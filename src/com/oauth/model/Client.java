@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 
 @Entity
@@ -20,17 +21,17 @@ public class Client {
 	@Column(unique = true)
 	private String clienId;
 
-	@Column
+	@Column(length=100)
 	private String name;
 	
-	@Column
+	@Column(length=120)
 	private String callback;
 	
-	@Column
+	@Column(length=40)
 	private String pass;
 	
 	
-	@OneToMany
+	@OneToMany(mappedBy = "client")
 	List<Term> terms;
 	
 	

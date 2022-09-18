@@ -16,13 +16,13 @@ public class User extends AbstractPersistable<Long> {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@Column
+	@Column(length=100)
 	String name;
 	
-	@Column
+	@Column(length=100)
 	String userId;
 	
-	@Column
+	@Column(length=40)
 	String pass;
 	
 	

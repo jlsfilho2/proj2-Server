@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 public class HistoryAcess {
@@ -22,9 +24,11 @@ public class HistoryAcess {
 	Client client;
 	
 	@Column
+	@Temporal(TemporalType.TIMESTAMP)
 	Date emit;
 	
 	@Column
+	@Temporal(TemporalType.TIMESTAMP)
 	Date lastRefresh;
 	
 	@Column
