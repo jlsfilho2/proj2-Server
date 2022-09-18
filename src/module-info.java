@@ -6,11 +6,11 @@
  *
  */
 module ProjetoDesenvolvimento2 {
-	exports com.oauth.rest;
-	exports com.oatuh.services;
-	exports com.oauth.infra;
-	exports com.oauth.model;
-	exports com.oauth.repository;
+	exports com.evita.rest;
+	exports com.evita.services;
+	exports com.evita.infra;
+	exports com.evita.model;
+	exports com.evita.repository;
 
 	requires javaee.api;
 	requires spring.beans;
