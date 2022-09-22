@@ -4,6 +4,8 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -21,10 +23,10 @@ public class UsuarioSolicitacao {
 	private long id;
 	
 	@ManyToOne
-	UsuarioServico userRequisitante;
+	Usuario userRequisitante;
 	
 	@ManyToOne
-	UsuarioServico userRequisitado;
+	Usuario userRequisitado;
 	
 	@Column
 	@Temporal(TemporalType.TIMESTAMP)
@@ -34,19 +36,79 @@ public class UsuarioSolicitacao {
 	@Temporal(TemporalType.TIMESTAMP)
 	Date horaFim;
 	
+	@Enumerated(EnumType.STRING)
+	Status status;
+	
 	
 	enum Status {
-		INICIADO("iniciado"),
-		AGENDADO("agendado"),
-		CONCLUIDO("concluido");
-		
-		String descricao;
-		
-		Status(String descricao) {
-			this.descricao = descricao;
-		}
+		INICIADO,
+		AGENDADO,
+		CONCLUIDO;
 		
 	}
+
+
+	public long getId() {
+		return id;
+	}
+
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+
+	public Usuario getUserRequisitante() {
+		return userRequisitante;
+	}
+
+
+	public void setUserRequisitante(Usuario userRequisitante) {
+		this.userRequisitante = userRequisitante;
+	}
+
+
+	public Usuario getUserRequisitado() {
+		return userRequisitado;
+	}
+
+
+	public void setUserRequisitado(Usuario userRequisitado) {
+		this.userRequisitado = userRequisitado;
+	}
+
+
+	public Date getHoraInicio() {
+		return horaInicio;
+	}
+
+
+	public void setHoraInicio(Date horaInicio) {
+		this.horaInicio = horaInicio;
+	}
+
+
+	public Date getHoraFim() {
+		return horaFim;
+	}
+
+
+	public void setHoraFim(Date horaFim) {
+		this.horaFim = horaFim;
+	}
+
+
+	public Status getStatus() {
+		return status;
+	}
+
+
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+	
+	
+	
 	
 	
 	

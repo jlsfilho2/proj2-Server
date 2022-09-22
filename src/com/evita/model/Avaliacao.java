@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -21,33 +22,11 @@ public class Avaliacao {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@ManyToOne
-	UsuarioServico userRequisitante;
-	
-	@ManyToOne
-	UsuarioServico userRequisitado;
+	@OneToOne
+	Solicitacao solicitacao;
 	
 	@Column
-	@Temporal(TemporalType.TIMESTAMP)
-	Date horaInicio;
-	
-	@Column
-	@Temporal(TemporalType.TIMESTAMP)
-	Date horaFim;
-	
-	
-	enum Status {
-		INICIADO("iniciado"),
-		AGENDADO("agendado"),
-		CONCLUIDO("concluido");
-		
-		String descricao;
-		
-		Status(String descricao) {
-			this.descricao = descricao;
-		}
-		
-	}
+	Integer nota;
 	
 	
 	

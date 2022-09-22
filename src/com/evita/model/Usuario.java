@@ -1,5 +1,7 @@
 package com.evita.model;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -7,9 +9,12 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name="Usuario")
@@ -29,6 +34,10 @@ public class Usuario {
 	
 	@Column(length=40)
 	String pass;
+	
+	@JsonProperty(required=true)
+	@OneToMany(mappedBy="user")
+	List<UsuarioEndereco> endereco;
 	
 	@Enumerated(EnumType.STRING)
 	Tipo tipo;

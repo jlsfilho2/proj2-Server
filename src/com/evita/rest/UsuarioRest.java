@@ -28,6 +28,7 @@ public class UsuarioRest {
 	private UsuarioRepository userRepository;
 
 	@PostMapping
+	@ResponseBody
 	Usuario criar(  @RequestBody Usuario usuario) {
 		logger.log(Level.INFO, "criar usuário " + usuario);
 		try {
@@ -41,6 +42,7 @@ public class UsuarioRest {
 	}
 
 	@PutMapping
+	@ResponseBody
 	Usuario editar(@RequestBody Usuario usuario) {
 		logger.log(Level.INFO, "editar usuário");
 		try {
