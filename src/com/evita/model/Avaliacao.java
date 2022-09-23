@@ -1,17 +1,11 @@
 package com.evita.model;
 
-import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 @Entity
 public class Avaliacao {
@@ -27,6 +21,43 @@ public class Avaliacao {
 	
 	@Column
 	Integer nota;
+	
+	@Column
+	String comentario;
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public Solicitacao getSolicitacao() {
+		return solicitacao;
+	}
+
+	public void setSolicitacao(Solicitacao solicitacao) {
+		this.solicitacao = solicitacao;
+	}
+
+	public Integer getNota() {
+		return nota;
+	}
+
+	public void setNota(Integer nota) {
+		this.nota = nota;
+	}
+
+	public String getComentario() {
+		return comentario;
+	}
+
+	public void setComentario(String comentario) {
+		this.comentario = comentario;
+	}
+	
+	
 	
 	
 	

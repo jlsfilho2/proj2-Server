@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.evita.model.Usuario;
+import com.evita.model.UsuarioEndereco;
+import com.evita.repository.UsuarioEnderecoRepository;
 import com.evita.repository.UsuarioRepository;
 
 @RestController
@@ -27,12 +29,24 @@ public class UsuarioRest {
 	@Autowired
 	private UsuarioRepository userRepository;
 
+	@Autowired
+	private UsuarioEnderecoRepository userEnderecoRepository;
+
 	@PostMapping
 	@ResponseBody
-	Usuario criar(  @RequestBody Usuario usuario) {
+	Usuario criar(@RequestBody Usuario usuario) {
 		logger.log(Level.INFO, "criar usuário " + usuario);
 		try {
 			Usuario newUser = this.userRepository.saveAndFlush(usuario);
+			if (usuario.getEnderecos() != null && !usuario.getEnderecos().isEmpty()) {
+				List<UsuarioEndereco> enderecosUsuario = userEnderecoRepository.findByUser(usuario);
+				for (UsuarioEndereco endereco : usuario.getEnderecos()) {
+					if (!enderecosUsuario.contains(endereco)) {
+						endereco.setUser(newUser);
+						userEnderecoRepository.saveAndFlush(endereco);
+					}
+				}
+			}
 			return newUser;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
@@ -51,6 +65,24 @@ public class UsuarioRest {
 			userToEdit.setPass(usuario.getPass());
 			userToEdit.setTipo(usuario.getTipo());
 			this.userRepository.saveAndFlush(userToEdit);
+			if(usuario.getEnderecos() != null && !usuario.getEnderecos().isEmpty()) {
+				List<UsuarioEndereco> enderecosUsuario = userEnderecoRepository.findByUser(usuario);
+				for(UsuarioEndereco endereco : usuario.getEnderecos()) {
+					if(!enderecosUsuario.contains(endereco))
+						userEnderecoRepository.saveAndFlush(endereco);
+					else if(endereco.getId() != null)
+					{
+						UsuarioEndereco enderecoEdit = enderecosUsuario.get(enderecosUsuario.indexOf(endereco));
+						enderecoEdit.setNumero(endereco.getNumero());
+						enderecoEdit.setBairro(endereco.getBairro());
+						enderecoEdit.setComplemento(endereco.getComplemento());
+						enderecoEdit.setCep(endereco.getCep());
+						enderecoEdit.setCidade(endereco.getCidade());
+						enderecoEdit.setUf(endereco.getUf());
+						userEnderecoRepository.saveAndFlush(enderecoEdit);
+					}
+				}
+			}
 			return userToEdit;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
