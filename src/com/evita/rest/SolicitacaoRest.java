@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.evita.model.Solicitacao;
 import com.evita.model.Solicitacao.Status;
 import com.evita.model.Usuario;
+import com.evita.model.UsuarioEndereco;
 import com.evita.repository.SolicitacaoRepository;
 import com.evita.repository.UsuarioRepository;
 
@@ -71,36 +72,39 @@ public class SolicitacaoRest {
 
 	@GetMapping
 	@ResponseBody
-	List<Solicitacao> buscar(@RequestParam Long userRequisitanteId, @RequestParam Long userRequisitadoId,
-			@RequestParam Status status, @RequestParam String dataInicio, @RequestParam String dataFim) {
+	List<Solicitacao> buscar(@RequestParam(required = false) Long userRequisitanteId,
+			@RequestParam(required = false) Long userRequisitadoId, @RequestParam(required = false) Status status,
+			@RequestParam(required = false) String dataInicio, @RequestParam(required = false) String dataFim) {
 		logger.log(Level.INFO, "buscar solicitacões");
 		try {
 			Solicitacao solicitacaoFind = new Solicitacao();
-			if(userRequisitanteId != null) 
-				solicitacaoFind.setUserRequisitante(new Usuario(userRequisitanteId));
-			if(userRequisitadoId != null)				
-				solicitacaoFind.setUserRequisitado(  new Usuario(userRequisitadoId));
-			if(status != null)
-				solicitacaoFind.setStatus(status);
-			List<Solicitacao> solicitacoes = solicitacaoRepository.findAll(Example.of(solicitacaoFind));
-			Date dtInicio = StringUtils.isEmpty(dataInicio)? null : new SimpleDateFormat("dd-MM-yyyy").parse(dataInicio);
-			Date dtFim = StringUtils.isEmpty(dataFim)? null : new SimpleDateFormat("dd-MM-yyyy").parse(dataFim);
-			
-			if(dtFim != null && dtInicio != null)
-				solicitacoes.stream()
-			      .filter(solicitacao -> 
-			      solicitacao.getInicio().after(dtInicio) && solicitacao.getInicio().before(dtFim))
-			      .collect(Collectors.toList());
-			else if(dtFim != null)
-				solicitacoes.stream()
-			      .filter(solicitacao -> 
-			      solicitacao.getInicio().before(dtInicio))
-			      .collect(Collectors.toList());
-			else if(dtInicio != null)
-				solicitacoes.stream()
-			      .filter(solicitacao -> 
-			      solicitacao.getInicio().after(dtInicio))
-			      .collect(Collectors.toList());
+			List<Solicitacao> solicitacoes = null;
+			if (userRequisitanteId != null || userRequisitadoId != null || status != null) {
+				if (userRequisitanteId != null) {
+					UsuarioEndereco userEndereco = new UsuarioEndereco(new Usuario(userRequisitanteId));
+					solicitacaoFind.setEnderecoRequisitante(userEndereco);
+				}
+				if (userRequisitadoId != null)
+					solicitacaoFind.setUserRequisitado(new Usuario(userRequisitadoId));
+				if (status != null)
+					solicitacaoFind.setStatus(status);
+				solicitacoes = solicitacaoRepository.findAll(Example.of(solicitacaoFind));
+			} else
+				solicitacoes = solicitacaoRepository.findAll();
+			Date dtInicio = StringUtils.isEmpty(dataInicio) ? null
+					: new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataInicio);
+			Date dtFim = StringUtils.isEmpty(dataFim) ? null : new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataFim);
+
+			if (dtFim != null && dtInicio != null)
+				solicitacoes.stream().filter(
+						solicitacao -> solicitacao.getInicio().after(dtInicio) && solicitacao.getInicio().before(dtFim))
+						.collect(Collectors.toList());
+			else if (dtFim != null)
+				solicitacoes.stream().filter(solicitacao -> solicitacao.getInicio().before(dtInicio))
+						.collect(Collectors.toList());
+			else if (dtInicio != null)
+				solicitacoes.stream().filter(solicitacao -> solicitacao.getInicio().after(dtInicio))
+						.collect(Collectors.toList());
 			logger.log(Level.INFO, "retornando " + solicitacoes.size() + " solicitações");
 			return solicitacoes;
 		} catch (Exception ex) {

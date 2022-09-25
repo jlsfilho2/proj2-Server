@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.evita.model.Usuario;
+import com.evita.model.UsuarioCategoria;
 import com.evita.model.UsuarioEndereco;
+import com.evita.repository.UsuarioCategoriaRepository;
 import com.evita.repository.UsuarioEnderecoRepository;
 import com.evita.repository.UsuarioRepository;
 
@@ -31,6 +33,9 @@ public class UsuarioRest {
 
 	@Autowired
 	private UsuarioEnderecoRepository userEnderecoRepository;
+	
+	@Autowired
+	private UsuarioCategoriaRepository userCategoriaRepository;
 
 	@PostMapping
 	@ResponseBody
@@ -47,6 +52,16 @@ public class UsuarioRest {
 					}
 				}
 			}
+			if (usuario.getCategorias() != null && !usuario.getCategorias().isEmpty()) {
+				List<UsuarioCategoria> categoriasUsuario = userCategoriaRepository.findByUser(usuario);
+				for (UsuarioCategoria categoria : usuario.getCategorias()) {
+					if (!categoriasUsuario.contains(categoria)) {
+						categoria.setUser(newUser);
+						userCategoriaRepository.saveAndFlush(categoria);
+					}
+				}
+			}
+			
 			return newUser;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
@@ -80,6 +95,20 @@ public class UsuarioRest {
 						enderecoEdit.setCidade(endereco.getCidade());
 						enderecoEdit.setUf(endereco.getUf());
 						userEnderecoRepository.saveAndFlush(enderecoEdit);
+					}
+				}
+			}
+			
+			if(usuario.getCategorias() != null && !usuario.getCategorias().isEmpty()) {
+				List<UsuarioCategoria> categoriasUsuario = userCategoriaRepository.findByUser(usuario);
+				for(UsuarioCategoria categoria : usuario.getCategorias()) {
+					if(!categoriasUsuario.contains(categoria))
+						userCategoriaRepository.saveAndFlush(categoria);
+					else if(categoria.getId() != null)
+					{
+						UsuarioCategoria categoriaEdit = categoriasUsuario.get(categoriasUsuario.indexOf(categoria));
+						categoriaEdit.setValor(categoria.getValor());
+						userCategoriaRepository.saveAndFlush(categoriaEdit);
 					}
 				}
 			}

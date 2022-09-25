@@ -17,19 +17,24 @@ import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Solicitacao {
 	
 	
 	@Id
 	@Column
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 	
 	@ManyToOne
-	Usuario userRequisitante;
+	UsuarioEndereco enderecoRequisitante;
 	
 	@ManyToOne
 	Usuario userRequisitado;
@@ -53,23 +58,25 @@ public class Solicitacao {
 	}
 
 
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
 
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
+	
+	
 
 
-	public Usuario getUserRequisitante() {
-		return userRequisitante;
+	public UsuarioEndereco getEnderecoRequisitante() {
+		return enderecoRequisitante;
 	}
 
 
-	public void setUserRequisitante(Usuario userRequisitante) {
-		this.userRequisitante = userRequisitante;
+	public void setEnderecoRequisitante(UsuarioEndereco enderecoRequisitante) {
+		this.enderecoRequisitante = enderecoRequisitante;
 	}
 
 
@@ -86,7 +93,11 @@ public class Solicitacao {
 	public Date getInicio() {
 		return inicio;
 	}
-
+	
+	@JsonGetter("inicio")
+	public String getInicioFormat() {
+		return new SimpleDateFormat("dd-MM-yyyy HH:mm").format(inicio);
+	}
 
 	public void setInicio(Date horaInicio) {
 		this.inicio = horaInicio;
@@ -100,6 +111,11 @@ public class Solicitacao {
 
 	public Date getFim() {
 		return fim;
+	}
+	
+	@JsonGetter("fim")
+	public String getFimFormat() {
+		return new SimpleDateFormat("dd-MM-yyyy HH:mm").format(fim);
 	}
 
 

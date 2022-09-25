@@ -14,11 +14,17 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name="Usuario")
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Usuario {
 	
@@ -37,11 +43,15 @@ public class Usuario {
 	String pass;
 	
 	@JsonProperty(required=false)
-	@OneToMany(mappedBy="user", fetch=FetchType.EAGER)
+	@OneToMany(mappedBy="user")
 	List<UsuarioEndereco> enderecos;
 	
 	@Enumerated(EnumType.STRING)
 	Tipo tipo;
+	
+	@JsonProperty(required=false)
+	@OneToMany(mappedBy="user",fetch=FetchType.EAGER)
+	List<UsuarioCategoria> categorias;
 	
 	
 	
@@ -123,6 +133,16 @@ public class Usuario {
 
 	public void setTipo(Tipo tipo) {
 		this.tipo = tipo;
+	}
+
+	
+	
+	public List<UsuarioCategoria> getCategorias() {
+		return categorias;
+	}
+
+	public void setCategorias(List<UsuarioCategoria> categorias) {
+		this.categorias = categorias;
 	}
 
 	@Override

@@ -10,12 +10,13 @@ import org.springframework.stereotype.Repository;
 import com.evita.model.Solicitacao;
 import com.evita.model.Solicitacao.Status;
 import com.evita.model.Usuario;
+import com.evita.model.UsuarioEndereco;
 
 @Repository
 public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> {
 	
 	
-	List<Solicitacao> findByUserRequisitante(Usuario usuario); 
+	List<Solicitacao> findByEnderecoRequisitante(UsuarioEndereco endereco); 
 	
 	List<Solicitacao> findByUserRequisitado(Usuario usuario); 
 	

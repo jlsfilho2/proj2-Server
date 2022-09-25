@@ -10,8 +10,10 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Entity
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UsuarioEndereco {
 	
 	
@@ -45,7 +47,13 @@ public class UsuarioEndereco {
 	@Column
 	Integer numero;
 	
+	UsuarioEndereco() {
+		
+	}
 	
+	public UsuarioEndereco(Usuario usuario) {
+		this.user = usuario;
+	}
 
 	public Long getId() {
 		return id;
