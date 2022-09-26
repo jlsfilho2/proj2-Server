@@ -4,10 +4,17 @@ import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -24,27 +31,45 @@ public class UsuarioEndereco {
 	
 	@ManyToOne
 	@JsonIgnore
+	@NotNull(message="Usuário não pode ser nulo")
 	Usuario user;
 	
-	@Column
-	String uf;
+	@Column(length=2,nullable=false)
+	@Enumerated(EnumType.STRING)
+	@NotNull(message="A UF deve ser informada")
+	UF uf;
 	
-	@Column
+	public enum UF{
+	RS,SC,PR,AC,PA,AP,BA,SE,ES,GO,PB,TO,RR,SP,RJ,MA,MG,RO,AM,PE,PI,RN,DF	
+	}
+	
+	@Column(length=8,nullable=false)
+	@Size(max=8,min=8,message="O CEP deve ter no máximo 8 caractéres")
+	@Pattern(regexp="[0-9]",message="CEP deve conter apenas caractéres numéricos")
+	@NotNull(message="O CEP deve ser informado")
 	String cep;
 	
-	@Column
+	@Column(length=60,nullable=true)
+	@Size(max=0,min=60,message="O complemento deve ter no máximo 80 caractéres")
 	String complemento;
 	
-	@Column
+	@Column(length=60,nullable=false)
+	@Size(max=60,min=0,message="O logradouro deve ter no máximo 60 caractéres")
+	@NotNull(message="O logradouro deve ser informado")
 	String logradouro;
 	
-	@Column
+	@Column(length=60,nullable=false)
+	@Size(max=60,min=3,message="A Cidade deve ter no máximo 60 caractéres")
+	@NotNull(message="A Cidade deve ser informada")
 	String cidade;
 	
-	@Column
+	@Column(length=60,nullable=false)
+	@Size(max=60,min=3,message="O Bairro deve ter no máximo 60 caractéres")
+	@NotNull(message="O Bairro deve ser informado")
 	String bairro;
 	
-	@Column
+	@Column(nullable=true)
+	@Min(value=0,message="O número deve ser maior que 0")
 	Integer numero;
 	
 	UsuarioEndereco() {
@@ -71,11 +96,11 @@ public class UsuarioEndereco {
 		this.user = user;
 	}
 
-	public String getUf() {
+	public UF getUf() {
 		return uf;
 	}
 
-	public void setUf(String uf) {
+	public void setUf(UF uf) {
 		this.uf = uf;
 	}
 

@@ -12,6 +12,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -27,12 +29,15 @@ public class UsuarioCategoria {
 	
 	@ManyToOne
 	@JsonIgnore
+	@NotNull(message="Usuário não pode ser nulo")
 	Usuario user;
 	
 	@Enumerated(EnumType.STRING)
 	Categoria categoria;
 	
 	@Column
+	@Min(value=0,message="Valor pelo serviço deve ser maior que de 0")
+	@NotNull(message="Deve ser informado um valor pelo serviço")
 	Float valor;
 	
 	UsuarioCategoria() {

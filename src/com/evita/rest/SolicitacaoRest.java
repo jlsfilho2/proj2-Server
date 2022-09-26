@@ -9,6 +9,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import javax.validation.Validation;
+import javax.validation.Validator;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.util.StringUtils;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.evita.model.Avaliacao;
 import com.evita.model.Solicitacao;
 import com.evita.model.Solicitacao.Status;
 import com.evita.model.Usuario;
@@ -41,6 +45,7 @@ public class SolicitacaoRest {
 	@ResponseBody
 	Solicitacao criar(@RequestBody Solicitacao solicitacao) {
 		logger.log(Level.INFO, "criar solicitação " + solicitacao);
+		validate(solicitacao);
 		try {
 			Solicitacao newSolicitacao = this.solicitacaoRepository.saveAndFlush(solicitacao);
 
@@ -55,6 +60,7 @@ public class SolicitacaoRest {
 	@PutMapping
 	@ResponseBody
 	Solicitacao editar(@RequestBody Solicitacao solicitacao) {
+		validate(solicitacao);
 		logger.log(Level.INFO, "editar solicitacao");
 		try {
 			Solicitacao solicitacaoToEdit = this.solicitacaoRepository.getById(solicitacao.getId());
@@ -112,6 +118,21 @@ public class SolicitacaoRest {
 			return new ArrayList<Solicitacao>();
 		}
 
+	}
+	
+	
+	private void validate(Solicitacao solicitacao) {
+		logger.log(Level.INFO, "validando solicitação " + solicitacao);
+		Validator validator = Validation.buildDefaultValidatorFactory()
+	            .getValidator();
+		StringBuilder sb = new StringBuilder();
+		validator.validate(solicitacao)
+        .stream()
+        .forEach(violation -> sb.append(violation.getMessage()));
+		
+		if(sb.length() > 0)
+			throw new RuntimeException(sb.toString());
+		
 	}
 
 }

@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.validation.Validation;
+import javax.validation.Validator;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.evita.model.Solicitacao;
 import com.evita.model.Usuario;
 import com.evita.model.UsuarioCategoria;
 import com.evita.model.UsuarioEndereco;
@@ -133,6 +137,20 @@ public class UsuarioRest {
 			return new ArrayList<Usuario>();
 		}
 
+	}
+	
+	private void validate(Solicitacao solicitacao) {
+		logger.log(Level.INFO, "validando solicitação " + solicitacao);
+		Validator validator = Validation.buildDefaultValidatorFactory()
+	            .getValidator();
+		StringBuilder sb = new StringBuilder();
+		validator.validate(solicitacao)
+        .stream()
+        .forEach(violation -> sb.append(violation.getMessage()));
+		
+		if(sb.length() > 0)
+			throw new RuntimeException(sb.toString());
+		
 	}
 
 }

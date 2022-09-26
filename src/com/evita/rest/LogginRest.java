@@ -28,15 +28,16 @@ import com.evita.model.Solicitacao;
 import com.evita.model.Usuario;
 import com.evita.model.UsuarioEndereco;
 import com.evita.repository.AvaliacaoRepository;
+import com.evita.repository.UsuarioRepository;
 
 @RestController
-@RequestMapping("/avaliacao")
-public class AvaliacaoRest {
+@RequestMapping("/loggin")
+public class LogginRest {
 
-	Logger logger = Logger.getLogger(AvaliacaoRest.class.getName());
+	Logger logger = Logger.getLogger(LogginRest.class.getName());
 
 	@Autowired
-	private AvaliacaoRepository avaliacaoRepository;
+	private UsuarioRepository usuarioRepository;
 
 	@PostMapping
 	@ResponseBody

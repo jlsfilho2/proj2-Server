@@ -13,6 +13,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -34,12 +37,24 @@ public class Usuario {
 	private long id;
 	
 	@Column(length=100,nullable=false)
+	@Size(min=5,max=100,message="Nome deve ter no mínimo 5 e no máximo 100 caractéres")
+	@NotNull(message="Nome deve ser informado")
 	String nome;
 	
+	@Column(length=100,nullable=false)
+	@Size(min=5,max=100,message="Email deve ter no mínimo 5 e no máximo 100 caractéres")
+	@NotNull(message="Email deve ser informado")
+	@Email(message="Email inválido")
+	String email;
+	
 	@Column(length=100, unique=true,nullable=false)
+	@Size(min=5,max=100,message="UserId deve ter no mínimo 5 e no máximo 100 caractéres")
+	@NotNull(message="UserId deve ser informado")
 	String userId;
 	
 	@Column(length=40,nullable=false)
+	@Size(min=5,max=40,message="Senha deve ter no mínimo 5 e no máximo 100 caractéres")
+	@NotNull(message="Senha deve ser informada")
 	String pass;
 	
 	@JsonProperty(required=false)

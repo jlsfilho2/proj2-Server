@@ -16,7 +16,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Future;
+import javax.validation.constraints.NotNull;
 
+import com.evita.model.UsuarioCategoria.Categoria;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -34,21 +37,32 @@ public class Solicitacao {
 	private Long id;
 	
 	@ManyToOne
+	@NotNull(message="Endereço do requisitante deve ser informado")
 	UsuarioEndereco enderecoRequisitante;
 	
 	@ManyToOne
+	@NotNull(message="Usuário requisitado deve ser informado")
 	Usuario userRequisitado;
 	
 	@Column
 	@Temporal(TemporalType.TIMESTAMP)
+	@Future(message="Data de início deve ser futura")
+	@NotNull(message="Data de início deve ser informada")
 	Date inicio;
 	
 	@Column
 	@Temporal(TemporalType.TIMESTAMP)
+	@Future(message="Data fim deve ser futura")
+	@NotNull(message="Data fim deve ser informada")
 	Date fim;
 	
 	@Enumerated(EnumType.STRING)
+	@NotNull(message="Status deve ser informado")
 	Status status;
+	
+	@Enumerated(EnumType.STRING)
+	@NotNull(message="Categoria do serviço deve ser informada")
+	Categoria categoria;
 	
 	
 	public enum Status {
@@ -136,6 +150,16 @@ public class Solicitacao {
 
 	public void setStatus(Status status) {
 		this.status = status;
+	}
+
+
+	public Categoria getCategoria() {
+		return categoria;
+	}
+
+
+	public void setCategoria(Categoria categoria) {
+		this.categoria = categoria;
 	}
 	
 	
