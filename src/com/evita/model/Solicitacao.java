@@ -68,6 +68,7 @@ public class Solicitacao {
 	public enum Status {
 		INICIADO,
 		AGENDADO,
+		CANCELADO,
 		CONCLUIDO;
 	}
 

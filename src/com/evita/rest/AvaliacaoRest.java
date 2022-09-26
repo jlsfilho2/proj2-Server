@@ -124,7 +124,7 @@ public class AvaliacaoRest {
 		StringBuilder sb = new StringBuilder();
 		validator.validate(avaliacao)
         .stream()
-        .forEach(violation -> sb.append(violation.getMessage()));
+        .forEach(violation -> sb.append(violation.getMessage()).append(";"));
 		
 		if(sb.length() > 0)
 			throw new RuntimeException(sb.toString());

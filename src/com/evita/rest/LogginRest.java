@@ -41,13 +41,19 @@ public class LogginRest {
 
 	@PostMapping
 	@ResponseBody
-	Avaliacao criar(@RequestBody Avaliacao avaliacao) {
-		logger.log(Level.INFO, "criar avaliação " + avaliacao);
-		validate(avaliacao);
+	Usuario logar(@RequestBody LogginEntity loggin) {
+		logger.log(Level.INFO, "Logar usuario " + loggin);
+		Usuario usuario = null;
 		try {
-			Avaliacao newAvaliacao = this.avaliacaoRepository.saveAndFlush(avaliacao);
-
-			return newAvaliacao;
+			if (!StringUtils.isEmpty(loggin.getEmail()))
+				usuario = this.usuarioRepository.findByEmail(loggin.getEmail());
+			else if (!StringUtils.isEmpty(loggin.getUserId()))
+				usuario = this.usuarioRepository.findByUserId(loggin.getEmail());
+			else
+				return null;
+			if(usuario.getPass().contentEquals(loggin.getSenha()))
+				return usuario;
+			else return null;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
 			return null;
@@ -55,81 +61,43 @@ public class LogginRest {
 
 	}
 
-	@PutMapping
-	@ResponseBody
-	Avaliacao editar(@RequestBody Avaliacao avaliacao) {
-		logger.log(Level.INFO, "editar avaliação");
-		validate(avaliacao);
-		try {
-			Avaliacao avaliacaoToEdit = this.avaliacaoRepository.getById(avaliacao.getId());
-			avaliacaoToEdit.setNota(avaliacao.getNota());
-			avaliacaoToEdit.setComentario(avaliacao.getComentario());
-			this.avaliacaoRepository.saveAndFlush(avaliacaoToEdit);
-			return avaliacaoToEdit;
-		} catch (Exception ex) {
-			logger.log(Level.SEVERE, ex.getMessage());
-			return null;
+	class LogginEntity {
+
+		String email;
+
+		String senha;
+
+		String userId;
+
+		public String getEmail() {
+			return email;
 		}
 
-	}
-
-	@GetMapping
-	@ResponseBody
-	List<Avaliacao> buscar(@RequestParam(required = false) Long userRequisitanteId,
-			@RequestParam(required = false) Long userRequisitadoId,
-			@RequestParam(required = false) String dataInicio, @RequestParam(required = false) String dataFim) {
-		logger.log(Level.INFO, "buscar avaliações");
-		try {
-			Avaliacao avaliacaoFind = new Avaliacao();
-			Solicitacao solicitacao = new Solicitacao();
-			List<Avaliacao> avaliacoes = null;
-			if (userRequisitanteId != null || userRequisitadoId != null) {
-				if (userRequisitanteId != null) {
-					UsuarioEndereco userEndereco = new UsuarioEndereco(new Usuario(userRequisitanteId));
-					solicitacao.setEnderecoRequisitante(userEndereco);
-				}
-				if (userRequisitadoId != null)
-					solicitacao.setUserRequisitado(new Usuario(userRequisitadoId));
-				avaliacaoFind.setSolicitacao(solicitacao);
-				avaliacoes = avaliacaoRepository.findAll(Example.of(avaliacaoFind));
-			} else
-				avaliacoes = avaliacaoRepository.findAll();
-			Date dtInicio = StringUtils.isEmpty(dataInicio) ? null
-					: new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataInicio);
-			Date dtFim = StringUtils.isEmpty(dataFim) ? null
-					: new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataFim);
-
-			if (dtFim != null && dtInicio != null)
-				avaliacoes.stream().filter(
-						avaliacao -> avaliacao.getSolicitacao().getInicio().after(dtInicio) && avaliacao.getSolicitacao().getInicio().before(dtFim))
-						.collect(Collectors.toList());
-			else if (dtFim != null)
-				avaliacoes.stream().filter(avaliacao -> avaliacao.getSolicitacao().getInicio().before(dtInicio))
-						.collect(Collectors.toList());
-			else if (dtInicio != null)
-				avaliacoes.stream().filter(avaliacao -> avaliacao.getSolicitacao().getInicio().after(dtInicio))
-						.collect(Collectors.toList());
-			logger.log(Level.INFO, "retornando " + avaliacoes.size() + " avaliações");
-			return avaliacoes;
-		} catch (Exception ex) {
-			logger.log(Level.SEVERE, ex.getMessage());
-			return new ArrayList<Avaliacao>();
+		public void setEmail(String email) {
+			this.email = email;
 		}
 
-	}
-	
-	private void validate(Avaliacao avaliacao) {
-		logger.log(Level.INFO, "validando avaliação " + avaliacao);
-		Validator validator = Validation.buildDefaultValidatorFactory()
-	            .getValidator();
-		StringBuilder sb = new StringBuilder();
-		validator.validate(avaliacao)
-        .stream()
-        .forEach(violation -> sb.append(violation.getMessage()));
-		
-		if(sb.length() > 0)
-			throw new RuntimeException(sb.toString());
-		
+		public String getSenha() {
+			return senha;
+		}
+
+		public void setSenha(String senha) {
+			this.senha = senha;
+		}
+
+		public String getUserId() {
+			return userId;
+		}
+
+		public void setUserId(String userId) {
+			this.userId = userId;
+		}
+
+		@Override
+		public String toString() {
+			return "LogginEntity [email=" + email + ", senha=" + senha + ", userId=" + userId + "]";
+		}
+
 	}
 
 }

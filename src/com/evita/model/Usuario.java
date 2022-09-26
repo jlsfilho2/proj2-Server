@@ -2,6 +2,7 @@ package com.evita.model;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,12 +18,9 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
@@ -52,8 +50,8 @@ public class Usuario {
 	@NotNull(message="UserId deve ser informado")
 	String userId;
 	
-	@Column(length=40,nullable=false)
-	@Size(min=5,max=40,message="Senha deve ter no mínimo 5 e no máximo 100 caractéres")
+	@Column(length=60,nullable=false)
+	@Size(min=5,max=60,message="Senha deve ter no mínimo 5 e no máximo 100 caractéres")
 	@NotNull(message="Senha deve ser informada")
 	String pass;
 	
@@ -66,7 +64,7 @@ public class Usuario {
 	
 	@JsonProperty(required=false)
 	@OneToMany(mappedBy="user",fetch=FetchType.EAGER)
-	List<UsuarioCategoria> categorias;
+	Set<UsuarioCategoria> categorias;
 	
 	
 	
@@ -85,8 +83,12 @@ public class Usuario {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(userId);
+		return Objects.hash(email, userId);
 	}
+
+	
+	
+	
 
 	@Override
 	public boolean equals(Object obj) {
@@ -97,10 +99,16 @@ public class Usuario {
 		if (getClass() != obj.getClass())
 			return false;
 		Usuario other = (Usuario) obj;
-		return Objects.equals(userId, other.userId);
+		return Objects.equals(email, other.email) && Objects.equals(userId, other.userId);
 	}
-	
-	
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
 	public long getId() {
 		return id;
@@ -152,11 +160,11 @@ public class Usuario {
 
 	
 	
-	public List<UsuarioCategoria> getCategorias() {
+	public Set<UsuarioCategoria> getCategorias() {
 		return categorias;
 	}
 
-	public void setCategorias(List<UsuarioCategoria> categorias) {
+	public void setCategorias(Set<UsuarioCategoria> categorias) {
 		this.categorias = categorias;
 	}
 

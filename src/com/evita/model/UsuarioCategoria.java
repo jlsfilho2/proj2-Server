@@ -21,42 +21,43 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Entity
 public class UsuarioCategoria {
-	
+
 	@Id
 	@Column
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@ManyToOne
 	@JsonIgnore
-	@NotNull(message="Usuário não pode ser nulo")
+	@NotNull(message = "Usuário não pode ser nulo")
 	Usuario user;
-	
+
 	@Enumerated(EnumType.STRING)
 	Categoria categoria;
-	
+
 	@Column
-	@Min(value=0,message="Valor pelo serviço deve ser maior que de 0")
-	@NotNull(message="Deve ser informado um valor pelo serviço")
+	@Min(value = 0, message = "Valor pelo serviço deve ser maior que de 0")
+	@NotNull(message = "Deve ser informado um valor pelo serviço")
 	Float valor;
-	
+
 	UsuarioCategoria() {
-		
+
 	}
-	
+
+	public UsuarioCategoria(Categoria categoria) {
+		this.categoria = categoria;
+	}
+
 	enum Categoria {
-		MANUTENCAO_ELETRICA("Manutenção Elétrica"),
-		MANUTENCAO_HIDRAULICA("Manutenção Hidráulica"),
-		HIGIENE_PESSOAL("Higiene Pessoal"),
-		LIMPEZA("Limpeza"),
-		CUIDADOS("Cuidados");
-		
-		
-		String descricao;
+		MANUTENCAO_ELETRICA("Manutenção Elétrica"), MANUTENCAO_HIDRAULICA("Manutenção Hidráulica"),
+		HIGIENE_PESSOAL("Higiene Pessoal"), LIMPEZA("Limpeza"), CUIDADOS("Cuidados");
+
+		String dscricao;
+
 		Categoria(String descricao) {
 			this.descricao = descricao;
 		}
-		
+
 	}
 
 	public Usuario getUser() {
@@ -93,7 +94,7 @@ public class UsuarioCategoria {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(categoria, id, user);
+		return Objects.hash(categoria);
 	}
 
 	@Override
@@ -105,12 +106,7 @@ public class UsuarioCategoria {
 		if (getClass() != obj.getClass())
 			return false;
 		UsuarioCategoria other = (UsuarioCategoria) obj;
-		return categoria == other.categoria && id == other.id && Objects.equals(user, other.user);
+		return categoria == other.categoria;
 	}
-	
-	
-	
-	
-	
 
 }

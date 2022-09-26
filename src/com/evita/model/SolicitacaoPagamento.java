@@ -4,6 +4,8 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,35 +17,56 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 public class SolicitacaoPagamento {
-	
-	
+
 	@Id
 	@Column
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	
+
 	@OneToOne
-	@NotNull(message="Solicitação deve ser informada")
+	@NotNull(message = "Solicitação deve ser informada")
 	Solicitacao solicitacao;
-	
+
 	@Column
 	@Temporal(TemporalType.TIMESTAMP)
-	@NotNull(message="Data deve ser informada")
 	Date data;
-	
+
 	@Column
-	@Min(value=0,message="Valor total deve ser maior que 0")
-	@NotNull(message="Valor total deve ser informado")
+	@Min(value = 0, message = "Valor total deve ser maior que 0")
+	@NotNull(message = "Valor total deve ser informado")
 	Float total;
-	
+
 	@Column
-	@Min(value=0,message="Valor prestado deve ser maior que 0")
-	@NotNull(message="Valor prestado deve ser informado")
+	@Min(value = 0, message = "Valor prestado deve ser maior que 0")
+	@NotNull(message = "Valor prestado deve ser informado")
 	Float valorPrestado;
-	
+
 	@Column
-	@Min(value=0,message="Valor do desconto deve ser maior que 0")
+	@Min(value = 0, message = "Valor do desconto deve ser maior que 0")
 	Float valorDesconto;
+
+	@Enumerated(EnumType.STRING)
+	Status status;
+
+	@Enumerated(EnumType.STRING)
+	Tipo tipo;
+
+	SolicitacaoPagamento() {
+
+	}
+
+	public SolicitacaoPagamento(Solicitacao solicitacao) {
+		this.solicitacao = solicitacao;
+		this.status = Status.PENDENTE;
+	}
+
+	enum Tipo {
+		BANCO, PIX, DINHEIRO, BOLETO
+	}
+
+	enum Status {
+		CONFIRMADO, PENDENTE
+	}
 
 	public long getId() {
 		return id;
@@ -92,11 +115,21 @@ public class SolicitacaoPagamento {
 	public void setValorDesconto(Float valorDesconto) {
 		this.valorDesconto = valorDesconto;
 	}
-	
-	
-	
-	
-	
-	
+
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+	public Tipo getTipo() {
+		return tipo;
+	}
+
+	public void setTipo(Tipo tipo) {
+		this.tipo = tipo;
+	}
 
 }

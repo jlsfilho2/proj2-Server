@@ -9,6 +9,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -80,8 +81,13 @@ public class UsuarioRest {
 		logger.log(Level.INFO, "editar usuário");
 		try {
 			Usuario userToEdit = this.userRepository.getById(usuario.getId());
+			if(!StringUtils.isEmpty(usuario.getNome()))
 			userToEdit.setNome(usuario.getNome());
+			if(!StringUtils.isEmpty(usuario.getEmail()))
+			userToEdit.setEmail(usuario.getEmail());
+			if(!StringUtils.isEmpty(usuario.getPass()))
 			userToEdit.setPass(usuario.getPass());
+			if(!StringUtils.isEmpty(usuario.getTipo()))
 			userToEdit.setTipo(usuario.getTipo());
 			this.userRepository.saveAndFlush(userToEdit);
 			if(usuario.getEnderecos() != null && !usuario.getEnderecos().isEmpty()) {
@@ -126,15 +132,20 @@ public class UsuarioRest {
 
 	@GetMapping
 	@ResponseBody
-	List<Usuario> buscar(@RequestParam String userId) {
+	Usuario buscar(@RequestParam String userId, @RequestParam String email) {
 		logger.log(Level.INFO, "buscar usuários");
+		Usuario usuario = null;
 		try {
-			List<Usuario> usuarios = this.userRepository.findByUserId(userId);
-			logger.log(Level.INFO, "retornando " + usuarios.size() + " usuários");
-			return usuarios;
+			if(!StringUtils.isEmpty(userId))
+			usuario = this.userRepository.findByUserId(userId);
+			else if(!StringUtils.isEmpty(email))
+				usuario = this.userRepository.findByEmail(email);
+			else return null;
+			logger.log(Level.INFO, "retornando usuário");
+			return usuario;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
-			return new ArrayList<Usuario>();
+			return null;
 		}
 
 	}
@@ -146,7 +157,7 @@ public class UsuarioRest {
 		StringBuilder sb = new StringBuilder();
 		validator.validate(solicitacao)
         .stream()
-        .forEach(violation -> sb.append(violation.getMessage()));
+        .forEach(violation -> sb.append(violation.getMessage()).append(";"));
 		
 		if(sb.length() > 0)
 			throw new RuntimeException(sb.toString());

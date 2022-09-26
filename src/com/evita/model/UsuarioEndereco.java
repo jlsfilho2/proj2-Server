@@ -31,11 +31,11 @@ public class UsuarioEndereco {
 	
 	@ManyToOne
 	@JsonIgnore
-	@NotNull(message="Usuário não pode ser nulo")
+	@NotNull(message="Usuário deve ser informado")
 	Usuario user;
 	
-	@Column(length=2,nullable=false)
 	@Enumerated(EnumType.STRING)
+	@Column(length=2,nullable=false)
 	@NotNull(message="A UF deve ser informada")
 	UF uf;
 	

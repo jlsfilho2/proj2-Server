@@ -27,9 +27,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.evita.model.Avaliacao;
 import com.evita.model.Solicitacao;
 import com.evita.model.Solicitacao.Status;
+import com.evita.model.SolicitacaoPagamento;
 import com.evita.model.Usuario;
+import com.evita.model.UsuarioCategoria;
 import com.evita.model.UsuarioEndereco;
+import com.evita.repository.SolicitacaoPagamentoRepository;
 import com.evita.repository.SolicitacaoRepository;
+import com.evita.repository.UsuarioCategoriaRepository;
 import com.evita.repository.UsuarioRepository;
 
 @RestController
@@ -40,6 +44,12 @@ public class SolicitacaoRest {
 
 	@Autowired
 	private SolicitacaoRepository solicitacaoRepository;
+
+	@Autowired
+	private UsuarioCategoriaRepository usuarioCategoriaRepository;
+
+	@Autowired
+	private SolicitacaoPagamentoRepository solicitacaoPagamentoRepository;
 
 	@PostMapping
 	@ResponseBody
@@ -64,9 +74,24 @@ public class SolicitacaoRest {
 		logger.log(Level.INFO, "editar solicitacao");
 		try {
 			Solicitacao solicitacaoToEdit = this.solicitacaoRepository.getById(solicitacao.getId());
-			solicitacaoToEdit.setInicio(solicitacao.getInicio());
-			solicitacaoToEdit.setFim(solicitacao.getFim());
-			solicitacaoToEdit.setStatus(solicitacao.getStatus());
+			if (solicitacao.getInicio() != null)
+				solicitacaoToEdit.setInicio(solicitacao.getInicio());
+			if (solicitacao.getFim() != null)
+				solicitacaoToEdit.setFim(solicitacao.getFim());
+			if (solicitacao.getStatus() != null) {
+				solicitacaoToEdit.setStatus(solicitacao.getStatus());
+				if (solicitacao.getStatus() == Status.CONCLUIDO) {
+					UsuarioCategoria userCategoria = null;
+					List<UsuarioCategoria> usuarioCategoria = usuarioCategoriaRepository
+							.findByUser(solicitacao.getEnderecoRequisitante().getUser());
+					if (usuarioCategoria.
+							contains(new UsuarioCategoria(solicitacao.getCategoria())));
+					userCategoria = usuarioCategoria.get(usuarioCategoria.indexOf(new UsuarioCategoria(solicitacao.getCategoria()));
+					SolicitacaoPagamento solicitacaoPagamento = new SolicitacaoPagamento(solicitacaoToEdit);
+					solicitacaoPagamentoRepository.saveAndFlush(solicitacaoPagamento);
+
+				}
+			}
 			this.solicitacaoRepository.saveAndFlush(solicitacaoToEdit);
 			return solicitacaoToEdit;
 		} catch (Exception ex) {
@@ -119,20 +144,16 @@ public class SolicitacaoRest {
 		}
 
 	}
-	
-	
+
 	private void validate(Solicitacao solicitacao) {
 		logger.log(Level.INFO, "validando solicitação " + solicitacao);
-		Validator validator = Validation.buildDefaultValidatorFactory()
-	            .getValidator();
+		Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 		StringBuilder sb = new StringBuilder();
-		validator.validate(solicitacao)
-        .stream()
-        .forEach(violation -> sb.append(violation.getMessage()));
-		
-		if(sb.length() > 0)
+		validator.validate(solicitacao).stream().forEach(violation -> sb.append(violation.getMessage()).append(";"));
+
+		if (sb.length() > 0)
 			throw new RuntimeException(sb.toString());
-		
+
 	}
 
 }
