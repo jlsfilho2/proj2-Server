@@ -52,7 +52,7 @@ public class UsuarioCategoria {
 		MANUTENCAO_ELETRICA("Manutenção Elétrica"), MANUTENCAO_HIDRAULICA("Manutenção Hidráulica"),
 		HIGIENE_PESSOAL("Higiene Pessoal"), LIMPEZA("Limpeza"), CUIDADOS("Cuidados");
 
-		String dscricao;
+		String descricao;
 
 		Categoria(String descricao) {
 			this.descricao = descricao;
@@ -109,4 +109,10 @@ public class UsuarioCategoria {
 		return categoria == other.categoria;
 	}
 
+	@Override
+	public String toString() {
+		return "UsuarioCategoria [user=" + user + ", categoria=" + categoria + ", valor=" + valor + "]";
+	}
+
+	
 }

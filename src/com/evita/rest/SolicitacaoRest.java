@@ -14,6 +14,7 @@ import javax.validation.Validator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.evita.model.Avaliacao;
 import com.evita.model.Solicitacao;
@@ -62,7 +64,8 @@ public class SolicitacaoRest {
 			return newSolicitacao;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
-			return null;
+			throw new ResponseStatusException(
+			           HttpStatus.BAD_REQUEST, ex.getMessage());
 		}
 
 	}
@@ -70,7 +73,7 @@ public class SolicitacaoRest {
 	@PutMapping
 	@ResponseBody
 	Solicitacao editar(@RequestBody Solicitacao solicitacao) {
-		validate(solicitacao);
+		//validate(solicitacao);
 		logger.log(Level.INFO, "editar solicitacao");
 		try {
 			Solicitacao solicitacaoToEdit = this.solicitacaoRepository.getById(solicitacao.getId());
@@ -81,23 +84,34 @@ public class SolicitacaoRest {
 			if (solicitacao.getStatus() != null) {
 				solicitacaoToEdit.setStatus(solicitacao.getStatus());
 				if (solicitacao.getStatus() == Status.CONCLUIDO) {
+					logger.log(Level.INFO, "estado concluído, solicitação de pagamento");
 					UsuarioCategoria userCategoria = null;
+					SolicitacaoPagamento solicitacaoPagamento = null;
 					List<UsuarioCategoria> usuarioCategoria = usuarioCategoriaRepository
-							.findByUser(solicitacao.getEnderecoRequisitante().getUser());
+							.findByUser(solicitacaoToEdit.getEnderecoRequisitante().getUser());
 					if (usuarioCategoria.
-							contains(new UsuarioCategoria(solicitacao.getCategoria())));
-					userCategoria = usuarioCategoria.get(usuarioCategoria.indexOf(new UsuarioCategoria(solicitacao.getCategoria()));
-					SolicitacaoPagamento solicitacaoPagamento = new SolicitacaoPagamento(solicitacaoToEdit);
+							contains(new UsuarioCategoria(solicitacaoToEdit.getCategoria()))) {
+						logger.log(Level.INFO, "encontrada instancia de usuarioCategoria");
+					userCategoria = usuarioCategoria.get(usuarioCategoria.indexOf(new UsuarioCategoria(solicitacaoToEdit.getCategoria())));
+					logger.log(Level.INFO, "inserindo com " + userCategoria);
+					solicitacaoPagamento = new SolicitacaoPagamento(solicitacaoToEdit,userCategoria.getValor());
+					} 
+					else  {
+						logger.log(Level.INFO, "criando uma instância default");
+						solicitacaoPagamento = new SolicitacaoPagamento(solicitacaoToEdit,0.0f);
+					}
 					solicitacaoPagamentoRepository.saveAndFlush(solicitacaoPagamento);
 
 				}
 			}
 			this.solicitacaoRepository.saveAndFlush(solicitacaoToEdit);
 			return solicitacaoToEdit;
-		} catch (Exception ex) {
-			logger.log(Level.SEVERE, ex.getMessage());
-			return null;
-		}
+		}catch(	Exception ex)
+	{
+		logger.log(Level.SEVERE, "erro: " + ex.getMessage() + ", " + ex.getClass().getName());
+		throw new ResponseStatusException(
+		           HttpStatus.BAD_REQUEST, ex.getMessage());
+	}
 
 	}
 
@@ -140,7 +154,7 @@ public class SolicitacaoRest {
 			return solicitacoes;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
-			return new ArrayList<Solicitacao>();
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
 		}
 
 	}
@@ -152,7 +166,7 @@ public class SolicitacaoRest {
 		validator.validate(solicitacao).stream().forEach(violation -> sb.append(violation.getMessage()).append(";"));
 
 		if (sb.length() > 0)
-			throw new RuntimeException(sb.toString());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, sb.toString());
 
 	}
 

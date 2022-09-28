@@ -13,6 +13,7 @@ import javax.validation.Validator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.evita.model.Avaliacao;
 import com.evita.model.Solicitacao;
@@ -50,24 +52,32 @@ public class LogginRest {
 			else if (!StringUtils.isEmpty(loggin.getUserId()))
 				usuario = this.usuarioRepository.findByUserId(loggin.getEmail());
 			else
-				return null;
-			if(usuario.getPass().contentEquals(loggin.getSenha()))
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "informe o e-mail ou userId");
+			logger.log(Level.INFO, "Encontrado o usuario " + usuario);
+			if (usuario == null)
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "nenhum usuário encontrado");
+			else if (usuario.getPass().contentEquals(loggin.getSenha()))
 				return usuario;
-			else return null;
+			else
+				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "acesso não autorizado");
+
 		} catch (Exception ex) {
-			logger.log(Level.SEVERE, ex.getMessage());
-			return null;
+			logger.log(Level.SEVERE, ex.getMessage() + ", " + ex.getClass().getName());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
 		}
 
 	}
 
-	class LogginEntity {
+	static class LogginEntity {
 
 		String email;
 
 		String senha;
 
 		String userId;
+
+		LogginEntity() {
+		}
 
 		public String getEmail() {
 			return email;

@@ -55,10 +55,14 @@ public class SolicitacaoPagamento {
 
 	}
 
-	public SolicitacaoPagamento(Solicitacao solicitacao) {
+	public SolicitacaoPagamento(Solicitacao solicitacao, Float valor) {
 		this.solicitacao = solicitacao;
+		this.valorPrestado = valor;
+		this.total = valor;
 		this.status = Status.PENDENTE;
 	}
+
+
 
 	enum Tipo {
 		BANCO, PIX, DINHEIRO, BOLETO

@@ -9,6 +9,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.evita.model.Solicitacao;
 import com.evita.model.Usuario;
@@ -46,6 +48,7 @@ public class UsuarioRest {
 	@ResponseBody
 	Usuario criar(@RequestBody Usuario usuario) {
 		logger.log(Level.INFO, "criar usuário " + usuario);
+		validate(usuario);
 		try {
 			Usuario newUser = this.userRepository.saveAndFlush(usuario);
 			if (usuario.getEnderecos() != null && !usuario.getEnderecos().isEmpty()) {
@@ -70,7 +73,8 @@ public class UsuarioRest {
 			return newUser;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
-			return null;
+			throw new ResponseStatusException(
+			           HttpStatus.BAD_REQUEST, ex.getMessage());
 		}
 
 	}
@@ -112,8 +116,10 @@ public class UsuarioRest {
 			if(usuario.getCategorias() != null && !usuario.getCategorias().isEmpty()) {
 				List<UsuarioCategoria> categoriasUsuario = userCategoriaRepository.findByUser(usuario);
 				for(UsuarioCategoria categoria : usuario.getCategorias()) {
-					if(!categoriasUsuario.contains(categoria))
+					if(!categoriasUsuario.contains(categoria)) {
+						categoria.setUser(userToEdit);
 						userCategoriaRepository.saveAndFlush(categoria);
+					}
 					else if(categoria.getId() != null)
 					{
 						UsuarioCategoria categoriaEdit = categoriasUsuario.get(categoriasUsuario.indexOf(categoria));
@@ -125,14 +131,15 @@ public class UsuarioRest {
 			return userToEdit;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
-			return null;
+			throw new ResponseStatusException(
+			           HttpStatus.BAD_REQUEST, ex.getMessage());
 		}
 
 	}
 
 	@GetMapping
 	@ResponseBody
-	Usuario buscar(@RequestParam String userId, @RequestParam String email) {
+	Usuario buscar(@RequestParam(required=false) String userId, @RequestParam(required=false) String email) {
 		logger.log(Level.INFO, "buscar usuários");
 		Usuario usuario = null;
 		try {
@@ -145,22 +152,24 @@ public class UsuarioRest {
 			return usuario;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
-			return null;
+			throw new ResponseStatusException(
+			           HttpStatus.BAD_REQUEST, ex.getMessage());
 		}
 
 	}
 	
-	private void validate(Solicitacao solicitacao) {
-		logger.log(Level.INFO, "validando solicitação " + solicitacao);
+	private void validate(Usuario usuario) {
+		logger.log(Level.INFO, "validando solicitação " + usuario);
 		Validator validator = Validation.buildDefaultValidatorFactory()
 	            .getValidator();
 		StringBuilder sb = new StringBuilder();
-		validator.validate(solicitacao)
+		validator.validate(usuario)
         .stream()
         .forEach(violation -> sb.append(violation.getMessage()).append(";"));
 		
 		if(sb.length() > 0)
-			throw new RuntimeException(sb.toString());
+			throw new ResponseStatusException(
+			           HttpStatus.BAD_REQUEST, sb.toString());
 		
 	}
 

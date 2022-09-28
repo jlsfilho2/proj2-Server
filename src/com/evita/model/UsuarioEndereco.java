@@ -44,13 +44,13 @@ public class UsuarioEndereco {
 	}
 	
 	@Column(length=8,nullable=false)
-	@Size(max=8,min=8,message="O CEP deve ter no máximo 8 caractéres")
-	@Pattern(regexp="[0-9]",message="CEP deve conter apenas caractéres numéricos")
+	@Size(max=8,message="O CEP deve ter 8 caractéres")
+	@Pattern(regexp="[0-9]*",message="CEP deve conter apenas caractéres numéricos")
 	@NotNull(message="O CEP deve ser informado")
 	String cep;
 	
 	@Column(length=60,nullable=true)
-	@Size(max=0,min=60,message="O complemento deve ter no máximo 80 caractéres")
+	@Size(max=60,min=0,message="O complemento deve ter no máximo 80 caractéres")
 	String complemento;
 	
 	@Column(length=60,nullable=false)

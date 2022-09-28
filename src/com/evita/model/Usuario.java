@@ -18,7 +18,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -53,6 +53,7 @@ public class Usuario {
 	@Column(length=60,nullable=false)
 	@Size(min=5,max=60,message="Senha deve ter no mínimo 5 e no máximo 100 caractéres")
 	@NotNull(message="Senha deve ser informada")
+	@JsonIgnore
 	String pass;
 	
 	@JsonProperty(required=false)

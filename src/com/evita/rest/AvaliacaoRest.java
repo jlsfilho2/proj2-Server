@@ -13,6 +13,7 @@ import javax.validation.Validator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.evita.model.Avaliacao;
 import com.evita.model.Solicitacao;
@@ -49,7 +51,8 @@ public class AvaliacaoRest {
 			return newAvaliacao;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
-			return null;
+			throw new ResponseStatusException(
+			           HttpStatus.BAD_REQUEST, ex.getMessage());
 		}
 
 	}
@@ -58,7 +61,7 @@ public class AvaliacaoRest {
 	@ResponseBody
 	Avaliacao editar(@RequestBody Avaliacao avaliacao) {
 		logger.log(Level.INFO, "editar avaliação");
-		validate(avaliacao);
+		//validate(avaliacao);
 		try {
 			Avaliacao avaliacaoToEdit = this.avaliacaoRepository.getById(avaliacao.getId());
 			avaliacaoToEdit.setNota(avaliacao.getNota());
@@ -127,7 +130,8 @@ public class AvaliacaoRest {
         .forEach(violation -> sb.append(violation.getMessage()).append(";"));
 		
 		if(sb.length() > 0)
-			throw new RuntimeException(sb.toString());
+			throw new  ResponseStatusException(
+			           HttpStatus.BAD_REQUEST, sb.toString());
 		
 	}
 
