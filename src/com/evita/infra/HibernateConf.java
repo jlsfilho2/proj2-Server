@@ -1,7 +1,11 @@
 package com.evita.infra;
 
-import java.util.HashMap;
+import java.io.FileInputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -10,80 +14,92 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+
 @Configuration
-@EnableJpaRepositories(
-		entityManagerFactoryRef = "EntityManagerFactory",
-        basePackages = {"com.evita.repository"})
+@EnableJpaRepositories(entityManagerFactoryRef = "EntityManagerFactory", basePackages = { "com.evita.repository" })
 @EnableTransactionManagement
 public class HibernateConf {
 
+	Logger logger = Logger.getLogger(HibernateConf.class.getName());
 
-	/*@Bean(name="EntityManagerFactory")
-	  @Primary
-	public LocalSessionFactoryBean sessionFactory() {
-	    LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-	    sessionFactory.setHibernateProperties(hibernateProperties());
-	    sessionFactory.setDataSource(dataSource());
-	    sessionFactory.setPackagesToScan(new String[] { "com.evita.model" });
-	    return sessionFactory;
-	} */
+	private String s = System.getProperty("file.separator");
 
+	/*
+	 * @Bean(name="EntityManagerFactory")
+	 * 
+	 * @Primary public LocalSessionFactoryBean sessionFactory() {
+	 * LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
+	 * sessionFactory.setHibernateProperties(hibernateProperties());
+	 * sessionFactory.setDataSource(dataSource());
+	 * sessionFactory.setPackagesToScan(new String[] { "com.evita.model" }); return
+	 * sessionFactory; }
+	 */
 
+	@Bean
+	@Primary
+	public DataSource dataSource() {
+		BasicDataSource dataSource = new BasicDataSource();
+		Properties applicationProperties = getProperties();
+		dataSource.setDriverClassName(applicationProperties.getProperty("spring.datasource.driver"));
+		dataSource.setUrl(applicationProperties.getProperty("spring.datasource.url"));
+		dataSource.setUsername(applicationProperties.getProperty("spring.datasource.username"));
+		dataSource.setPassword(applicationProperties.getProperty("spring.datasource.password"));
 
-    @Bean
-    @Primary
-    public DataSource dataSource() {
-        final BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setDriverClassName("org.postgresql.Driver");
-        dataSource.setUrl("jdbc:postgresql://localhost:5432/oauth");
-        dataSource.setUsername("sistema");
-        dataSource.setPassword("admin");
+		return dataSource;
+	}
 
-        return dataSource;
-    }
-    
-    @Bean(name="EntityManagerFactory")
-    @Primary
-    public LocalContainerEntityManagerFactoryBean dbEntityManager() {
-        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(dataSource());
-        em.setPackagesToScan(new String[]{"com.evita.model"});
-        em.setPersistenceUnitName("dbEntityManager");
-        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        em.setJpaVendorAdapter(vendorAdapter);
+	@Bean(name = "EntityManagerFactory")
+	@Primary
+	public LocalContainerEntityManagerFactoryBean dbEntityManager() {
+		LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+		em.setDataSource(dataSource());
+		em.setPackagesToScan(new String[] { "com.evita.model" });
+		em.setPersistenceUnitName("dbEntityManager");
+		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+		em.setJpaVendorAdapter(vendorAdapter);
+		em.setJpaProperties(getHibernateProperties());
+		return em;
+	}
 
+	@Bean(name = "transactionManager")
+	@Primary
+	public PlatformTransactionManager hibernateTransactionManager() {
+		JpaTransactionManager transactionManager = new JpaTransactionManager();
+		transactionManager.setEntityManagerFactory(dbEntityManager().getObject());
+		return transactionManager;
+	}
 
-        em.setJpaProperties(hibernateProperties());
-        return em;
-    }
+	private Properties getHibernateProperties() {
+		Properties properties = new Properties();
+		properties.setProperty("hibernate.hbm2ddl.auto", "create");
+		properties.setProperty("hibernate.show_sql", "true");
+		properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+		return properties;
+	}
+	
+	private File getFile() {
+		return new File(System.getProperty("user.home") + s + "appservers" + s + "private" + s + "springboot" + s
+		+ "properties" + s + "application.properties");
+	}
 
-    @Bean(name="transactionManager")
-    @Primary
-    public PlatformTransactionManager hibernateTransactionManager() {
-         JpaTransactionManager transactionManager
-        = new JpaTransactionManager();
-         transactionManager.setEntityManagerFactory(
-                 dbEntityManager().getObject());
-        return transactionManager;
-    }
-    
+	private Properties getProperties() {
+		Properties properties = new Properties();
+		try {
+			File file =  getFile();
+			logger.log(Level.INFO, "lendo: " + file.getPath() + ", isFile=" + file.isFile());
+			InputStream input = new FileInputStream(file);
+			properties.load(input);
+		} catch (Exception ex) {
+			logger.log(Level.SEVERE, ex.getMessage() + ", " + ex.getClass().getName());
+		}
+		return properties;
+	}
 
-
-
-    private Properties hibernateProperties() {
-         Properties hibernateProperties = new Properties();
-        hibernateProperties.setProperty("hibernate.hbm2ddl.auto","update");
-        hibernateProperties.setProperty("hibernate.show_sql","true");
-        hibernateProperties.setProperty("hibernate.dialect","org.hibernate.dialect.PostgreSQLDialect");
-
-        return hibernateProperties;
-    }
 }
+
