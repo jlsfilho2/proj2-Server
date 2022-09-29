@@ -167,9 +167,11 @@ public class UsuarioRest {
         .stream()
         .forEach(violation -> sb.append(violation.getMessage()).append(";"));
 		
-		if(sb.length() > 0)
+		if(sb.length() > 0) {
+			logger.log(Level.SEVERE, sb.toString());
 			throw new ResponseStatusException(
 			           HttpStatus.BAD_REQUEST, sb.toString());
+		}
 		
 	}
 

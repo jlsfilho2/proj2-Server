@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name="Usuario")
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
+@JsonIgnoreProperties(value={"hibernateLazyInitializer","pass"},allowSetters=true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Usuario {
 	
@@ -53,7 +53,6 @@ public class Usuario {
 	@Column(length=60,nullable=false)
 	@Size(min=5,max=60,message="Senha deve ter no mínimo 5 e no máximo 100 caractéres")
 	@NotNull(message="Senha deve ser informada")
-	@JsonIgnore
 	String pass;
 	
 	@JsonProperty(required=false)
@@ -135,6 +134,7 @@ public class Usuario {
 		this.userId = userId;
 	}
 
+	
 	public String getPass() {
 		return pass;
 	}

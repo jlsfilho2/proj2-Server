@@ -129,9 +129,11 @@ public class AvaliacaoRest {
         .stream()
         .forEach(violation -> sb.append(violation.getMessage()).append(";"));
 		
-		if(sb.length() > 0)
-			throw new  ResponseStatusException(
+		if(sb.length() > 0){
+			logger.log(Level.SEVERE, sb.toString());
+			throw new ResponseStatusException(
 			           HttpStatus.BAD_REQUEST, sb.toString());
+		}
 		
 	}
 

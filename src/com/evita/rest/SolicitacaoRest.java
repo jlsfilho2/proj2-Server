@@ -165,8 +165,11 @@ public class SolicitacaoRest {
 		StringBuilder sb = new StringBuilder();
 		validator.validate(solicitacao).stream().forEach(violation -> sb.append(violation.getMessage()).append(";"));
 
-		if (sb.length() > 0)
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, sb.toString());
+		if (sb.length() > 0){
+			logger.log(Level.SEVERE, sb.toString());
+			throw new ResponseStatusException(
+			           HttpStatus.BAD_REQUEST, sb.toString());
+		}
 
 	}
 
