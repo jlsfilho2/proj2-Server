@@ -77,9 +77,10 @@ public class HibernateConf {
 
 	private Properties getHibernateProperties() {
 		Properties properties = new Properties();
-		properties.setProperty("hibernate.hbm2ddl.auto", "create");
-		properties.setProperty("hibernate.show_sql", "true");
-		properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+		Properties applicationProperties = getProperties();
+		properties.setProperty("hibernate.hbm2ddl.auto", applicationProperties.getProperty("hibernate.hbm2ddl.auto"));
+		properties.setProperty("hibernate.show_sql", applicationProperties.getProperty("hibernate.show_sql"));
+		properties.setProperty("hibernate.dialect", applicationProperties.getProperty("hibernate.dialect"));
 		return properties;
 	}
 	
