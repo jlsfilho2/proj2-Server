@@ -90,7 +90,7 @@ por userId ou email
    ]
 }
 ```
-## manipulação de solicitacações /solicitacao
+## manipulação de solicitações /solicitacao
 
 ### criar
 POST:
@@ -118,6 +118,44 @@ PUT:
 }
 ```
 ### consultar
-GET: conforme o exemplo: http://whm.joao1866.c41.integrator.host:9206/solicitaca?dataInicio=21-09-2022 00:00
+GET: conforme o exemplo: http://whm.joao1866.c41.integrator.host:9206/solicitacao?dataInicio=21-09-2022 00:00
 por dataInicio, dataFim, dataInicio e dataFim, userRequisitanteId, userRequisitadoId e status
 
+## manipulção de avaliações /avaliacao
+
+### criar
+POST:
+```
+{
+	"solicitacao":{
+	    "id":1
+	},
+	"nota":10,
+	"comentario":"meu primeiro comentario"
+}
+```
+### edição
+PUT:
+
+```
+{
+   "id":1,
+   "nota":10,
+   "comentario":"comentário editado"	
+}
+```
+
+### consultar
+GET: conforme o exemplo: http://whm.joao1866.c41.integrator.host:9206/avaliacao?userRequisitanteId=2
+por dataInicio, dataFim, dataInicio e dataFim, userRequisitanteId e userRequisitadoId
+
+## Outros métodos
+
+### login
+POST para http://whm.joao1866.c41.integrator.host:9206/loggin
+```
+{
+	"email":"heleninha2@hotmail.com.br",
+	"senha":"teste789"
+}
+```
