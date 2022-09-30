@@ -33,6 +33,7 @@ POST:
 	"tipo":"CLIENTE"
 }
 ```
+
 ### editar
 PUT:
 ```
@@ -89,3 +90,34 @@ por userId ou email
    ]
 }
 ```
+## manipulação de solicitacações /solicitacao
+
+### criar
+POST:
+```
+{
+	
+	"enderecoRequisitante" : {
+		"id":1
+		},
+	"userRequisitado" : {
+		"id":2
+		},
+	"status" :"AGENDADO",
+	"inicio":"28-09-2022 11:55",
+	"fim":"29-09-2022 12:55",
+	"categoria": "MANUTENCAO_HIDRAULICA"
+}
+```
+### editar
+PUT:
+```
+{
+      "id":1,
+      "status" :"CONCLUIDO"
+}
+```
+### consultar
+GET: conforme o exemplo: http://whm.joao1866.c41.integrator.host:9206/solicitaca?dataInicio=21-09-2022 00:00
+por dataInicio, dataFim, dataInicio e dataFim, userRequisitanteId, userRequisitadoId e status
+
