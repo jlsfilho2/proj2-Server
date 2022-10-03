@@ -163,6 +163,8 @@ public class Usuario {
 		this.categorias = categorias;
 	}
 
+	
+	
 	@Override
 	public String toString() {
 		return "Usuario [id=" + id + ", nome=" + nome + ", userId=" + userId + ", pass=" + pass + ", cliente=" + cliente

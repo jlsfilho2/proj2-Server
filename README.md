@@ -3,6 +3,37 @@
 Para consumo da aplicação Evita.
 Endpoit: http://whm.joao1866.c41.integrator.host:9206
 
+## Configuração da aplicação
+a aplicação buscará suas configurações na pasta /appservers/private/springboot/properties, no arquivo application.properties
+
+a configuração padrão é :
+```
+server.error.include-message=always
+spring.mvc.locale=pt_BR
+
+spring.datasource.driver=org.postgresql.Driver
+spring.datasource.url=jdbc:postgresql://localhost:5432/oauth
+spring.datasource.username=<>
+spring.datasource.password=<>
+
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+logging.file.max-size=3MB
+logging.file.name=${logging.file.path}/Evita.log
+logging.file.path=/private/springboot/logs/
+logging.pattern.dateformat=dd/MM/yy HH:mm:ss
+logging.pattern.file=%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%
+logging.level.root=INFO
+server.port=${port:8080}
+
+hibernate.hbm2ddl.auto=create
+hibernate.show_sql=true
+hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+hibernate.connection.url=jdbc:postgresql://localhost:5432/<>
+```
+
 ## manipulação de Usuários /usuario
 ### criar
 POST:
@@ -30,10 +61,10 @@ POST:
 		"categoria":"MANUTENCAO_HIDRAULICA",
 		"valor":15.50
 		}],
-	"tipo":"CLIENTE"
+	"cliente":true
 }
 ```
-
+São categorias válidas: MANUTENCAO_ELETRICA, MANUTENCAO_HIDRAULICA, HIGIENE_PESSOAL, LIMPEZA, CUIDADOS
 ### editar
 PUT:
 ```
@@ -52,9 +83,11 @@ PUT:
 		"bairro":"Cidade Baixa",
 		"numero": 567
 		}],
-	"tipo":"PRESTADOR"
+	"cliente":true
 }
 ```
+Obs: ao se passar um array vazio para edição, ocorre a exclusão dos registros, isso ocorre para as propriedades 'endereço' e 'categorias';
+
 ### consultar
 GET: conforme exemplo http://whm.joao1866.c41.integrator.host:9206/usuario?userId=marja321
 por userId ou email
@@ -75,7 +108,7 @@ por userId ou email
       "bairro": "Cidade Baixa",
       "numero": 567
    }],
-   "tipo": "PRESTADOR",
+   "cliente": true,
    "categorias":    [
             {
          "id": 1,
@@ -109,6 +142,8 @@ POST:
 	"categoria": "MANUTENCAO_HIDRAULICA"
 }
 ```
+Obs: são status válidos INICIADO, AGENDADO, CANCELADO e CONCLUIDO
+
 ### editar
 PUT:
 ```
@@ -159,3 +194,4 @@ POST para http://whm.joao1866.c41.integrator.host:9206/loggin
 	"senha":"teste789"
 }
 ```
+Obs: caso as entradas sejam válidas, serão retornados as informações do usuário.
