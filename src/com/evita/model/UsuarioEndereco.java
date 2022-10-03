@@ -72,6 +72,9 @@ public class UsuarioEndereco {
 	@Min(value=0,message="O número deve ser maior que 0")
 	Integer numero;
 	
+	@Column
+	Boolean ativo;
+	
 	UsuarioEndereco() {
 		
 	}
@@ -150,6 +153,16 @@ public class UsuarioEndereco {
 
 	public void setNumero(Integer numero) {
 		this.numero = numero;
+	}
+	
+	
+
+	public Boolean getAtivo() {
+		return ativo;
+	}
+
+	public void setAtivo(Boolean ativo) {
+		this.ativo = ativo;
 	}
 
 	@Override

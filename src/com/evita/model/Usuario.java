@@ -59,20 +59,13 @@ public class Usuario {
 	@OneToMany(mappedBy="user")
 	List<UsuarioEndereco> enderecos;
 	
-	@Enumerated(EnumType.STRING)
-	Tipo tipo;
+	@Column
+	Boolean cliente;
 	
 	@JsonProperty(required=false)
 	@OneToMany(mappedBy="user",fetch=FetchType.EAGER)
 	Set<UsuarioCategoria> categorias;
 	
-	
-	
-	enum Tipo {
-		PRESTADOR,
-		CLIENTE,
-		PRESTADOR_CLIENTE;
-	}
 
 	public Usuario() {}
 	
@@ -151,16 +144,17 @@ public class Usuario {
 		this.enderecos = enderecos;
 	}
 
-	public Tipo getTipo() {
-		return tipo;
-	}
-
-	public void setTipo(Tipo tipo) {
-		this.tipo = tipo;
-	}
-
 	
 	
+	
+	public Boolean getCliente() {
+		return cliente;
+	}
+
+	public void setCliente(Boolean cliente) {
+		this.cliente = cliente;
+	}
+
 	public Set<UsuarioCategoria> getCategorias() {
 		return categorias;
 	}
@@ -171,7 +165,7 @@ public class Usuario {
 
 	@Override
 	public String toString() {
-		return "Usuario [id=" + id + ", nome=" + nome + ", userId=" + userId + ", pass=" + pass + ", tipo=" + tipo
+		return "Usuario [id=" + id + ", nome=" + nome + ", userId=" + userId + ", pass=" + pass + ", cliente=" + cliente
 				+ "]";
 	}
 	

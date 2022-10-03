@@ -40,7 +40,7 @@ public class UsuarioRest {
 
 	@Autowired
 	private UsuarioEnderecoRepository userEnderecoRepository;
-	
+
 	@Autowired
 	private UsuarioCategoriaRepository userCategoriaRepository;
 
@@ -69,12 +69,11 @@ public class UsuarioRest {
 					}
 				}
 			}
-			
+
 			return newUser;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
-			throw new ResponseStatusException(
-			           HttpStatus.BAD_REQUEST, ex.getMessage());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
 		}
 
 	}
@@ -85,22 +84,21 @@ public class UsuarioRest {
 		logger.log(Level.INFO, "editar usuário");
 		try {
 			Usuario userToEdit = this.userRepository.getById(usuario.getId());
-			if(!StringUtils.isEmpty(usuario.getNome()))
-			userToEdit.setNome(usuario.getNome());
-			if(!StringUtils.isEmpty(usuario.getEmail()))
-			userToEdit.setEmail(usuario.getEmail());
-			if(!StringUtils.isEmpty(usuario.getPass()))
-			userToEdit.setPass(usuario.getPass());
-			if(!StringUtils.isEmpty(usuario.getTipo()))
-			userToEdit.setTipo(usuario.getTipo());
+			if (!StringUtils.isEmpty(usuario.getNome()))
+				userToEdit.setNome(usuario.getNome());
+			if (!StringUtils.isEmpty(usuario.getEmail()))
+				userToEdit.setEmail(usuario.getEmail());
+			if (!StringUtils.isEmpty(usuario.getPass()))
+				userToEdit.setPass(usuario.getPass());
+			if (!StringUtils.isEmpty(usuario.getCliente()))
+				userToEdit.setCliente(usuario.getCliente());
 			this.userRepository.saveAndFlush(userToEdit);
-			if(usuario.getEnderecos() != null && !usuario.getEnderecos().isEmpty()) {
+			if (usuario.getEnderecos() != null && !usuario.getEnderecos().isEmpty()) {
 				List<UsuarioEndereco> enderecosUsuario = userEnderecoRepository.findByUser(usuario);
-				for(UsuarioEndereco endereco : usuario.getEnderecos()) {
-					if(!enderecosUsuario.contains(endereco))
+				for (UsuarioEndereco endereco : usuario.getEnderecos()) {
+					if (!enderecosUsuario.contains(endereco))
 						userEnderecoRepository.saveAndFlush(endereco);
-					else if(endereco.getId() != null)
-					{
+					else if (endereco.getId() != null) {
 						UsuarioEndereco enderecoEdit = enderecosUsuario.get(enderecosUsuario.indexOf(endereco));
 						enderecoEdit.setNumero(endereco.getNumero());
 						enderecoEdit.setBairro(endereco.getBairro());
@@ -111,68 +109,71 @@ public class UsuarioRest {
 						userEnderecoRepository.saveAndFlush(enderecoEdit);
 					}
 				}
-			}
-			
-			if(usuario.getCategorias() != null && !usuario.getCategorias().isEmpty()) {
-				List<UsuarioCategoria> categoriasUsuario = userCategoriaRepository.findByUser(usuario);
-				for(UsuarioCategoria categoria : usuario.getCategorias()) {
-					if(!categoriasUsuario.contains(categoria)) {
-						categoria.setUser(userToEdit);
-						userCategoriaRepository.saveAndFlush(categoria);
+			} else if (usuario.getEnderecos() != null && usuario.getEnderecos().isEmpty()) {
+				List<UsuarioEndereco> enderecosUsuario = userEnderecoRepository.findByUser(usuario);
+				for (UsuarioEndereco endereco : enderecosUsuario) {
+					endereco.setAtivo(false);
+					userEnderecoRepository.saveAndFlush(endereco);
+				}
+
+				if (usuario.getCategorias() != null && !usuario.getCategorias().isEmpty()) {
+					List<UsuarioCategoria> categoriasUsuario = userCategoriaRepository.findByUser(usuario);
+					for (UsuarioCategoria categoria : usuario.getCategorias()) {
+						if (!categoriasUsuario.contains(categoria)) {
+							categoria.setUser(userToEdit);
+							userCategoriaRepository.saveAndFlush(categoria);
+						} else if (categoria.getId() != null) {
+							UsuarioCategoria categoriaEdit = categoriasUsuario
+									.get(categoriasUsuario.indexOf(categoria));
+							categoriaEdit.setValor(categoria.getValor());
+							userCategoriaRepository.saveAndFlush(categoriaEdit);
+						}
 					}
-					else if(categoria.getId() != null)
-					{
-						UsuarioCategoria categoriaEdit = categoriasUsuario.get(categoriasUsuario.indexOf(categoria));
-						categoriaEdit.setValor(categoria.getValor());
-						userCategoriaRepository.saveAndFlush(categoriaEdit);
-					}
+				} else if (usuario.getCategorias() != null && usuario.getCategorias().isEmpty()) {
+					List<UsuarioCategoria> categoriasUsuario = userCategoriaRepository.findByUser(usuario);
+					userCategoriaRepository.deleteAll(categoriasUsuario);
 				}
 			}
 			return userToEdit;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
-			throw new ResponseStatusException(
-			           HttpStatus.BAD_REQUEST, ex.getMessage());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
 		}
 
 	}
 
 	@GetMapping
 	@ResponseBody
-	Usuario buscar(@RequestParam(required=false) String userId, @RequestParam(required=false) String email) {
+	Usuario buscar(@RequestParam(required = false) String userId, @RequestParam(required = false) String email) {
 		logger.log(Level.INFO, "buscar usuários");
 		Usuario usuario = null;
 		try {
-			if(!StringUtils.isEmpty(userId))
-			usuario = this.userRepository.findByUserId(userId);
-			else if(!StringUtils.isEmpty(email))
+			if (!StringUtils.isEmpty(userId))
+				usuario = this.userRepository.findByUserId(userId);
+			else if (!StringUtils.isEmpty(email))
 				usuario = this.userRepository.findByEmail(email);
-			else return null;
+			else
+				return null;
 			logger.log(Level.INFO, "retornando usuário");
 			return usuario;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
-			throw new ResponseStatusException(
-			           HttpStatus.BAD_REQUEST, ex.getMessage());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
 		}
 
 	}
-	
+
 	private void validate(Usuario usuario) {
 		logger.log(Level.INFO, "validando solicitação " + usuario);
-		Validator validator = Validation.buildDefaultValidatorFactory()
-	            .getValidator();
+		Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 		StringBuilder sb = new StringBuilder();
-		validator.validate(usuario)
-        .stream()
-        .forEach(violation -> sb.append(violation.getMessage()).append(";"));
-		
-		if(sb.length() > 0) {
+		validator.validate(usuario).stream().forEach(violation -> sb.append(violation.getMessage()).append(";"));
+
+		if (sb.length() > 0) {
 			logger.log(Level.SEVERE, sb.toString());
-			throw new ResponseStatusException(
-			           HttpStatus.BAD_REQUEST, sb.toString());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, sb.toString());
 		}
-		
+
 	}
 
 }
