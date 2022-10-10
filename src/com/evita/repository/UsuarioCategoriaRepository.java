@@ -7,10 +7,13 @@ import org.springframework.stereotype.Repository;
 
 import com.evita.model.Usuario;
 import com.evita.model.UsuarioCategoria;
+import com.evita.model.UsuarioCategoria.Categoria;
 
 @Repository
 public interface UsuarioCategoriaRepository extends JpaRepository<UsuarioCategoria, Long> {
 	
-	List<UsuarioCategoria> findByUser(Usuario usuario); 	
+	List<UsuarioCategoria> findByUser(Usuario usuario);
+	
+	List<UsuarioCategoria> findByCategoria(Categoria categoria);
 	
 }

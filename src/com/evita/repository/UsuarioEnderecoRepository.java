@@ -13,6 +13,7 @@ import com.evita.model.UsuarioEndereco;
 public interface UsuarioEnderecoRepository extends JpaRepository<UsuarioEndereco, Long> {
 	
 	@Query("SELECT e FROM UsuarioEndereco e WHERE e.user =:usuario AND e.ativo=true")
-	List<UsuarioEndereco> findByUser(Usuario usuario); 	
+	List<UsuarioEndereco> findByUser(Usuario usuario); 
+	
 	
 }

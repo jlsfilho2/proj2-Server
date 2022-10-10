@@ -75,7 +75,7 @@ public class UsuarioEndereco {
 	@Column
 	Boolean ativo;
 	
-	UsuarioEndereco() {
+	public UsuarioEndereco() {
 		
 	}
 	
@@ -87,7 +87,7 @@ public class UsuarioEndereco {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -181,6 +181,13 @@ public class UsuarioEndereco {
 		UsuarioEndereco other = (UsuarioEndereco) obj;
 		return id == other.id;
 	}
+
+	@Override
+	public String toString() {
+		return "UsuarioEndereco [uf=" + uf + ", cidade=" + cidade + ", bairro=" + bairro + "]";
+	}
+	
+	
 
 	
 	

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.evita.model.Solicitacao;
+import com.evita.model.UsuarioCategoria.Categoria;
 import com.evita.model.Usuario;
 import com.evita.model.UsuarioCategoria;
 import com.evita.model.UsuarioEndereco;
@@ -153,12 +153,17 @@ public class UsuarioRest {
 			else if (!StringUtils.isEmpty(email))
 				usuario = this.userRepository.findByEmail(email);
 			else
-				return null;
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "sem parâmetros para busca");
+			if (usuario == null)
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "nenhum usuário encontrado");
 			logger.log(Level.INFO, "retornando usuário");
 			return usuario;
+		} catch (ResponseStatusException ex) {
+			logger.log(Level.SEVERE, ex.getMessage());
+			throw ex;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
 		}
 
 	}

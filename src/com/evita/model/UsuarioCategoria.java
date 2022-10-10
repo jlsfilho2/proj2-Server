@@ -48,7 +48,7 @@ public class UsuarioCategoria {
 		this.categoria = categoria;
 	}
 
-	enum Categoria {
+	public enum Categoria {
 		MANUTENCAO_ELETRICA("Manutenção Elétrica"), MANUTENCAO_HIDRAULICA("Manutenção Hidráulica"),
 		HIGIENE_PESSOAL("Higiene Pessoal"), LIMPEZA("Limpeza"), CUIDADOS("Cuidados");
 
