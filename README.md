@@ -123,6 +123,41 @@ por userId ou email
    ]
 }
 ```
+
+### catálogo de usuários
+GET: conforme exemplo http://whm.joao1866.c41.integrator.host:9206/usuarios?categoria=MANUTENCAO_ELETRICA&bairro=centro
+por categoria e UF, cidade e bairro
+```
+[{
+   "id": 2,
+   "nome": "Marja",
+   "email": "marja@hotmail.com",
+   "userId": "marja321",
+   "enderecos": [   {
+      "id": 2,
+      "uf": "RS",
+      "cep": "90130180",
+      "complemento": "casa",
+      "logradouro": "alguma rua",
+      "cidade": "Porto Alegre",
+      "bairro": "centro",
+      "numero": 567
+   }],
+   "cliente": true,
+   "categorias":    [
+            {
+         "id": 3,
+         "categoria": "MANUTENCAO_ELETRICA",
+         "valor": 10.5
+      },
+            {
+         "id": 4,
+         "categoria": "MANUTENCAO_HIDRAULICA",
+         "valor": 15.5
+      }
+   ]
+}]
+```
 ## manipulação de solicitações /solicitacao
 
 ### criar
