@@ -10,6 +10,7 @@ import javax.validation.Validator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,7 +45,7 @@ public class UsuarioRest {
 	@Autowired
 	private UsuarioCategoriaRepository userCategoriaRepository;
 
-	@PostMapping
+	@PostMapping(consumes = {"application/xml","application/json"})
 	@ResponseBody
 	Usuario criar(@RequestBody Usuario usuario) {
 		logger.log(Level.INFO, "criar usuário " + usuario);
@@ -78,7 +79,7 @@ public class UsuarioRest {
 
 	}
 
-	@PutMapping
+	@PutMapping(consumes = {"application/xml","application/json"})
 	@ResponseBody
 	Usuario editar(@RequestBody Usuario usuario) {
 		logger.log(Level.INFO, "editar usuário");

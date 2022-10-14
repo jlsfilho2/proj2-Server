@@ -14,6 +14,7 @@ import javax.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,7 +42,7 @@ public class LogginRest {
 	@Autowired
 	private UsuarioRepository usuarioRepository;
 
-	@PostMapping
+	@PostMapping(consumes = {"application/xml","application/json"})
 	@ResponseBody
 	Usuario logar(@RequestBody LogginEntity loggin) {
 		logger.log(Level.INFO, "Logar usuario " + loggin);

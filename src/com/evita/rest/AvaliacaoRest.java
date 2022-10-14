@@ -14,6 +14,7 @@ import javax.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,7 +41,7 @@ public class AvaliacaoRest {
 	@Autowired
 	private AvaliacaoRepository avaliacaoRepository;
 
-	@PostMapping
+	@PostMapping(consumes = {"application/xml","application/json"})
 	@ResponseBody
 	Avaliacao criar(@RequestBody Avaliacao avaliacao) {
 		logger.log(Level.INFO, "criar avaliação " + avaliacao);
@@ -57,7 +58,7 @@ public class AvaliacaoRest {
 
 	}
 
-	@PutMapping
+	@PutMapping(consumes = {"application/xml","application/json"})
 	@ResponseBody
 	Avaliacao editar(@RequestBody Avaliacao avaliacao) {
 		logger.log(Level.INFO, "editar avaliação");
@@ -75,7 +76,7 @@ public class AvaliacaoRest {
 
 	}
 
-	@GetMapping
+	@GetMapping(consumes= MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	List<Avaliacao> buscar(@RequestParam(required = false) Long userRequisitanteId,
 			@RequestParam(required = false) Long userRequisitadoId,

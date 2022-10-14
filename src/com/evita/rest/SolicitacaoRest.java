@@ -15,6 +15,7 @@ import javax.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,7 +54,7 @@ public class SolicitacaoRest {
 	@Autowired
 	private SolicitacaoPagamentoRepository solicitacaoPagamentoRepository;
 
-	@PostMapping
+	@PostMapping(consumes = {"application/xml","application/json"})
 	@ResponseBody
 	Solicitacao criar(@RequestBody Solicitacao solicitacao) {
 		logger.log(Level.INFO, "criar solicitação " + solicitacao);
@@ -70,7 +71,7 @@ public class SolicitacaoRest {
 
 	}
 
-	@PutMapping
+	@PutMapping(consumes = {"application/xml","application/json"})
 	@ResponseBody
 	Solicitacao editar(@RequestBody Solicitacao solicitacao) {
 		//validate(solicitacao);
