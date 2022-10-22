@@ -97,9 +97,9 @@ public class AvaliacaoRest {
 				avaliacoes = avaliacaoRepository.findAll(Example.of(avaliacaoFind));
 			} else
 				avaliacoes = avaliacaoRepository.findAll();
-			Date dtInicio = StringUtils.isEmpty(dataInicio) ? null
+			Date dtInicio = StringUtils.isEmpty(dataInicio) || dataInicio.contentEquals("null") ? null
 					: new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataInicio);
-			Date dtFim = StringUtils.isEmpty(dataFim) ? null
+			Date dtFim = StringUtils.isEmpty(dataFim) || dataFim.contentEquals("null") ? null
 					: new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataFim);
 
 			if (dtFim != null && dtInicio != null)
