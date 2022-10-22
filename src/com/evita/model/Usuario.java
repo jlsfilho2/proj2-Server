@@ -34,7 +34,7 @@ public class Usuario {
 	@Id
 	@Column
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 	
 	@Column(length=100,nullable=false)
 	@Size(min=5,max=100,message="Nome deve ter no mínimo 5 e no máximo 100 caractéres")
@@ -105,7 +105,7 @@ public class Usuario {
 		this.email = email;
 	}
 
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 

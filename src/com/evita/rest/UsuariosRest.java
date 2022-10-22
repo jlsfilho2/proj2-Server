@@ -52,7 +52,9 @@ public class UsuariosRest {
 			@RequestParam(required = false) String cidade, @RequestParam(required = false) String bairro) {
 		logger.log(Level.INFO, "buscar usuários");
 		boolean comCategoria = categoria != null;
-		boolean comEndereco = uf != null || StringUtils.isEmpty(cidade) || StringUtils.isEmpty(bairro);
+		boolean comEndereco = uf != null
+				|| (StringUtils.isEmpty(cidade) && !cidade.contentEquals("null"))
+				|| (StringUtils.isEmpty(bairro) && !cidade.contentEquals("null"));
 		try {
 			Set<Long> ids = new HashSet<>();
 			Set<Long> idsEndereco = new HashSet<>();
