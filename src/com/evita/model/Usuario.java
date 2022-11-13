@@ -53,9 +53,13 @@ public class Usuario {
 	String userId;
 	
 	@Column(length=60,nullable=false)
-	@Size(min=5,max=60,message="Senha deve ter no mínimo 5 e no máximo 100 caractéres")
+	@Size(min=5,max=60,message="Senha deve ter no mínimo 5 e no máximo 60 caractéres")
 	@NotNull(message="Senha deve ser informada")
 	String pass;
+	
+	@Column(length=20,nullable=true)
+	@Size(min=5,max=11,message="O telefone deve ter no mínimo 5 e no máximo 11 caractéres")
+	String telefone;
 	
 	@JsonProperty(required=false)
 	@OneToMany(mappedBy="user")
@@ -164,9 +168,19 @@ public class Usuario {
 	public void setCategorias(Set<UsuarioCategoria> categorias) {
 		this.categorias = categorias;
 	}
+	
+	
 
 	
 	
+	public String getTelefone() {
+		return telefone;
+	}
+
+	public void setTelefone(String telefone) {
+		this.telefone = telefone;
+	}
+
 	@Override
 	public String toString() {
 		return "Usuario [id=" + id + ", nome=" + nome + ", userId=" + userId + ", pass=" + pass + ", cliente=" + cliente

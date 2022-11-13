@@ -85,6 +85,7 @@ public class UsuarioRest {
 		logger.log(Level.INFO, "editar usuário");
 		try {
 			Usuario userToEdit = this.userRepository.getById(usuario.getId());
+			logger.log(Level.INFO, "usuario " + userToEdit);
 			if (!StringUtils.isEmpty(usuario.getNome()))
 				userToEdit.setNome(usuario.getNome());
 			if (!StringUtils.isEmpty(usuario.getEmail()))
@@ -93,12 +94,19 @@ public class UsuarioRest {
 				userToEdit.setPass(usuario.getPass());
 			if (!StringUtils.isEmpty(usuario.getCliente()))
 				userToEdit.setCliente(usuario.getCliente());
+			if (!StringUtils.isEmpty(usuario.getTelefone()))
+				userToEdit.setTelefone(usuario.getTelefone());
 			this.userRepository.saveAndFlush(userToEdit);
 			if (usuario.getEnderecos() != null && !usuario.getEnderecos().isEmpty()) {
+				logger.log(Level.FINE, "Editando endereço usuário com endereços");
 				List<UsuarioEndereco> enderecosUsuario = userEnderecoRepository.findByUser(usuario);
 				for (UsuarioEndereco endereco : usuario.getEnderecos()) {
-					if (!enderecosUsuario.contains(endereco))
+					if (!enderecosUsuario.contains(endereco)) {
+						endereco.setUser(userToEdit);
+						endereco.setAtivo(false);
+						logger.log(Level.FINE, "Salvando endereço " + endereco);
 						userEnderecoRepository.saveAndFlush(endereco);
+					}
 					else if (endereco.getId() != null) {
 						UsuarioEndereco enderecoEdit = enderecosUsuario.get(enderecosUsuario.indexOf(endereco));
 						enderecoEdit.setNumero(endereco.getNumero());
@@ -111,9 +119,12 @@ public class UsuarioRest {
 					}
 				}
 			} else if (usuario.getEnderecos() != null && usuario.getEnderecos().isEmpty()) {
+				logger.log(Level.FINE, "Editando endereço usuário sem endereços");
 				List<UsuarioEndereco> enderecosUsuario = userEnderecoRepository.findByUser(usuario);
 				for (UsuarioEndereco endereco : enderecosUsuario) {
+					endereco.setUser(userToEdit);
 					endereco.setAtivo(false);
+					logger.log(Level.INFO, "Salvando endereço " + endereco);
 					userEnderecoRepository.saveAndFlush(endereco);
 				}
 

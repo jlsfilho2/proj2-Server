@@ -184,7 +184,7 @@ public class UsuarioEndereco {
 
 	@Override
 	public String toString() {
-		return "UsuarioEndereco [uf=" + uf + ", cidade=" + cidade + ", bairro=" + bairro + "]";
+		return "UsuarioEndereco " + (user!= null ? "[usuario " + user.getId(): "[") + ", uf=" + uf + ", cidade=" + cidade + ", bairro=" + bairro + "]";
 	}
 	
 	

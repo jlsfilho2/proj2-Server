@@ -1,5 +1,6 @@
 package com.evita.rest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -49,16 +50,30 @@ public class UsuariosRest {
 	@GetMapping
 	@ResponseBody
 	List<Usuario> buscar(@RequestParam(required = false) Categoria categoria, @RequestParam(required = false) UF uf,
-			@RequestParam(required = false) String cidade, @RequestParam(required = false) String bairro) {
-		logger.log(Level.INFO, "buscar usuários");
+			@RequestParam(required = false) String cidade, @RequestParam(required = false) String bairro
+			,@RequestParam(required = false, defaultValue="CLIENTE_PRESTADOR") TIPO tipo) {
+		logger.log(Level.INFO, "buscar usuários " + tipo);
 		boolean comCategoria = categoria != null;
 		boolean comEndereco = uf != null
-				|| (StringUtils.isEmpty(cidade) && !cidade.contentEquals("null"))
-				|| (StringUtils.isEmpty(bairro) && !cidade.contentEquals("null"));
+				|| (!StringUtils.isEmpty(cidade) && !cidade.contentEquals("null"))
+				|| (!StringUtils.isEmpty(bairro) && !bairro.contentEquals("null"));
 		try {
 			Set<Long> ids = new HashSet<>();
 			Set<Long> idsEndereco = new HashSet<>();
-			if (comCategoria) {
+			if(tipo== TIPO.CLIENTE) {
+				logger.log(Level.INFO,"somente Clientes");
+				List<UsuarioCategoria> usuariosCategoria = userCategoriaRepository.findAll();
+				for (UsuarioCategoria cat : usuariosCategoria)
+					ids.add(cat.getUser().getId());
+			}
+			if(tipo== TIPO.PRESTADOR) {
+				logger.log(Level.INFO,"somente Prestadores");
+				List<UsuarioCategoria> usuariosCategoria = userCategoriaRepository.findAll();
+				for (UsuarioCategoria cat : usuariosCategoria)
+					ids.add(cat.getUser().getId());
+			}
+			if (tipo!= TIPO.CLIENTE && comCategoria) {
+				logger.log(Level.INFO,"com categoria");
 				List<UsuarioCategoria> usuariosCategoria = userCategoriaRepository.findByCategoria(categoria);
 				logger.log(Level.INFO,
 						"encontrados " + usuariosCategoria.size() + " usuários com a categoria " + categoria);
@@ -70,9 +85,9 @@ public class UsuariosRest {
 				
 				if (uf != null)
 					usuarioEndereco.setUf(uf);
-				if (!StringUtils.isEmpty(cidade))
+				if (!StringUtils.isEmpty(cidade)&& !cidade.contentEquals("null"))
 					usuarioEndereco.setCidade(cidade);
-				if (!StringUtils.isEmpty(bairro))
+				if (!StringUtils.isEmpty(bairro)&& !bairro.contentEquals("null"))
 					usuarioEndereco.setBairro(bairro);
 				List<UsuarioEndereco> usuariosEndereco = userEnderecoRepository.findAll(Example.of(usuarioEndereco));
 				logger.log(Level.INFO,
@@ -81,17 +96,41 @@ public class UsuariosRest {
 					idsEndereco.add(end.getUser().getId());
 				
 			}
-			if(comCategoria && comEndereco)
+			List<Usuario> usuarios = new ArrayList<>();
+			if(tipo== TIPO.CLIENTE) {
+				logger.log(Level.INFO,"listando clientes fora da lista");
+				usuarios = userRepository.findAllByIdNotIn(ids);
+			} else if(tipo== TIPO.PRESTADOR && !comCategoria && !comEndereco) {
+				logger.log(Level.INFO,"listando prestadores na lista");
+				usuarios = userRepository.findAllByIdIn(ids);
+			}else if(tipo!= TIPO.CLIENTE && comCategoria && comEndereco) {
+				logger.log(Level.INFO,"com categoria e com endereço");
 				ids = ids.stream().filter(element -> idsEndereco.contains(element)).collect(Collectors.toSet());
-			else ids = idsEndereco;
-			List<Usuario> usuarios = userRepository.findAllByIdIn(ids);
+				logger.log(Level.INFO,"restam ids " + ids.size());
+				usuarios = userRepository.findAllByIdIn(ids);
+			}
+			else if(comEndereco) {
+				ids = idsEndereco;
+				logger.log(Level.INFO,"com endereço");
+				usuarios = userRepository.findAllByIdIn(ids);
+			}
+			else if(tipo!= TIPO.CLIENTE && comCategoria)
+			{
+				logger.log(Level.INFO,"com categoria");
+				usuarios = userRepository.findAllByIdIn(ids);
+			} else 
+				usuarios = userRepository.findAll();
 			logger.log(Level.INFO, "retornando " + usuarios.size() + " usuários");
 			return usuarios;
 		} catch (Exception ex) {
-			logger.log(Level.SEVERE, ex.getMessage());
+			logger.log(Level.SEVERE, ex.getMessage(),ex);
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
 		}
 
+	}
+	
+	enum TIPO {
+		CLIENTE,CLIENTE_PRESTADOR,PRESTADOR
 	}
 
 }

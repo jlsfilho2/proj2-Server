@@ -17,6 +17,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	Usuario findByEmail(String email);
 	
 	List<Usuario> findAllByIdIn(Set<Long> ids);
+	
+	List<Usuario> findAllByIdNotIn(Set<Long> ids);
 
 	
 }

@@ -49,8 +49,10 @@ public class UsuarioCategoria {
 	}
 
 	public enum Categoria {
-		MANUTENCAO_ELETRICA("Manutenção Elétrica"), MANUTENCAO_HIDRAULICA("Manutenção Hidráulica"),
-		HIGIENE_PESSOAL("Higiene Pessoal"), LIMPEZA("Limpeza"), CUIDADOS("Cuidados");
+		MANUTENCAO_ELETRICA("Manutenção Elétrica"), DIARISTA("Diarista"), BABA("Babá"),
+		BABA_POR_TURNO("Babá por turno"), PINTORA("Pintora"), PEQUENOS_REPAROS("Pequenos reparos"), COSTURA("Costura"),
+		MANUTENCAO_HIDRAULICA("Manutenção Hidráulica"), HIGIENE_PESSOAL("Higiene Pessoal"), LIMPEZA("Limpeza"),
+		CUIDADOS("Cuidados");
 
 		String descricao;
 
@@ -114,5 +116,4 @@ public class UsuarioCategoria {
 		return "UsuarioCategoria [user=" + user + ", categoria=" + categoria + ", valor=" + valor + "]";
 	}
 
-	
 }
