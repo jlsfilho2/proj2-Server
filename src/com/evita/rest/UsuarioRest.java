@@ -156,15 +156,17 @@ public class UsuarioRest {
 
 	@GetMapping
 	@ResponseBody
-	Usuario buscar(@RequestParam(required = false) String userId, @RequestParam(required = false) String email) {
-		logger.log(Level.INFO, "buscar usuários userId:" + userId + ", email:" + email);
+	Usuario buscar(@RequestParam(required = false) String id, @RequestParam(required = false) String userId, @RequestParam(required = false) String email) {
+		logger.log(Level.INFO, "buscar usuários userId:" + userId + ", email:" + email + ", id: " + id);
 		Usuario usuario = null;
 		try {
 			if (!StringUtils.isEmpty(userId) &&!userId.contentEquals("null"))
 				usuario = this.userRepository.findByUserId(userId);
 			else if (!StringUtils.isEmpty(email) && !email.contentEquals("null"))
 				usuario = this.userRepository.findByEmail(email);
-			else
+			else if (!StringUtils.isEmpty(id)&& !id.contentEquals("null"))
+				usuario = this.userRepository.getById(Long.valueOf(id));
+			else 
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "sem parâmetros para busca");
 			if (usuario == null)
 				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "nenhum usuário encontrado");
