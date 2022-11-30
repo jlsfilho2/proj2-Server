@@ -1,9 +1,13 @@
 package com.evita.rest;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -14,6 +18,7 @@ import javax.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.evita.model.Avaliacao;
 import com.evita.model.Solicitacao;
-import com.evita.model.Solicitacao.Status;
+import com.evita.model.SolicitacaoPagamento.Status;
 import com.evita.model.SolicitacaoPagamento;
 import com.evita.model.Usuario;
 import com.evita.model.UsuarioCategoria;
@@ -36,88 +41,40 @@ import com.evita.model.UsuarioEndereco;
 import com.evita.repository.SolicitacaoPagamentoRepository;
 import com.evita.repository.SolicitacaoRepository;
 import com.evita.repository.UsuarioCategoriaRepository;
+import com.evita.repository.UsuarioRepository;
 
 @RestController
-@RequestMapping("/solicitacao")
-public class SolicitacaoRest {
+@RequestMapping("/pagamento")
+public class PagamentoRest {
 
-	Logger logger = Logger.getLogger(SolicitacaoRest.class.getName());
+	Logger logger = Logger.getLogger(PagamentoRest.class.getName());
 
 	@Autowired
 	private SolicitacaoRepository solicitacaoRepository;
 
 	@Autowired
-	private UsuarioCategoriaRepository usuarioCategoriaRepository;
-
-	@Autowired
 	private SolicitacaoPagamentoRepository solicitacaoPagamentoRepository;
-
-	@PostMapping(consumes = { "application/xml", "application/json" })
-	@ResponseBody
-	Solicitacao criar(@RequestBody Solicitacao solicitacao) {
-		logger.log(Level.INFO, "criar solicitação " + solicitacao);
-		validate(solicitacao);
-		try {
-			Solicitacao newSolicitacao = this.solicitacaoRepository.saveAndFlush(solicitacao);
-
-			return newSolicitacao;
-		} catch (Exception ex) {
-			logger.log(Level.SEVERE, ex.getMessage());
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
-		}
-
-	}
-
-	@DeleteMapping(consumes = { "application/xml", "application/json" })
-	void deletar(@RequestParam(required = true) Long id) {
-		logger.log(Level.INFO, "deletar solicitacao " + id);
-		try {
-			Solicitacao solicitacaoToEdit = this.solicitacaoRepository.getById(id);
-			if (solicitacaoToEdit.getStatus() == Status.AGENDADO)
-				this.solicitacaoRepository.deleteAllByIdInBatch(Arrays.asList(id));
-		} catch (Exception ex) {
-			logger.log(Level.SEVERE, ex.getMessage());
-		}
-
-	}
 
 	@PutMapping(consumes = { "application/xml", "application/json" })
 	@ResponseBody
-	Solicitacao editar(@RequestBody Solicitacao solicitacao) {
-		// validate(solicitacao);
-		logger.log(Level.INFO, "editar solicitacao");
+	SolicitacaoPagamento editar(@RequestBody SolicitacaoPagamento solicitacaoPagamento) {
+		logger.log(Level.INFO, "editar solicitação de pagamento");
 		try {
-			Solicitacao solicitacaoToEdit = this.solicitacaoRepository.getById(solicitacao.getId());
-			if (solicitacao.getInicio() != null)
-				solicitacaoToEdit.setInicio(solicitacao.getInicio());
-			if (solicitacao.getFim() != null)
-				solicitacaoToEdit.setFim(solicitacao.getFim());
-			if (solicitacao.getStatus() != null) {
-				solicitacaoToEdit.setStatus(solicitacao.getStatus());
-				if (solicitacao.getStatus() == Status.CONCLUIDO) {
-					logger.log(Level.INFO, "estado concluído, solicitação de pagamento");
-					UsuarioCategoria userCategoria = null;
-					SolicitacaoPagamento solicitacaoPagamento = null;
-					List<UsuarioCategoria> usuarioCategoria = usuarioCategoriaRepository
-							.findByUser(solicitacaoToEdit.getUsuarioRequisitante());
-					usuarioCategoria = usuarioCategoria.stream()
-							.filter(catFilter -> catFilter.getCategoria() == solicitacaoToEdit.getCategoria())
-							.collect(Collectors.toList());
-					if (!usuarioCategoria.isEmpty()) {
-						logger.log(Level.INFO, "encontrada instancia de usuarioCategoria");
-						userCategoria = usuarioCategoria.get(0);
-						logger.log(Level.INFO, "inserindo com " + userCategoria);
-						solicitacaoPagamento = new SolicitacaoPagamento(solicitacaoToEdit, userCategoria.getValor());
-					} else {
-						logger.log(Level.INFO, "criando uma instância default");
-						solicitacaoPagamento = new SolicitacaoPagamento(solicitacaoToEdit, 0.0f);
-					}
-					solicitacaoPagamentoRepository.saveAndFlush(solicitacaoPagamento);
-
-				}
+			SolicitacaoPagamento solicitacaoToEdit = this.solicitacaoPagamentoRepository.getById(solicitacaoPagamento.getId());
+			if (solicitacaoPagamento.getStatus() != null) {
+				solicitacaoToEdit.setStatus(solicitacaoPagamento.getStatus());
+				solicitacaoToEdit.setData(solicitacaoPagamento.getStatus() == Status.CONFIRMADO? new Date() : null);
 			}
-			this.solicitacaoRepository.saveAndFlush(solicitacaoToEdit);
-			return solicitacaoToEdit;
+			if (solicitacaoPagamento.getTipo() != null) {
+				solicitacaoToEdit.setTipo(solicitacaoPagamento.getTipo());
+			}
+			if (solicitacaoPagamento.getValorDesconto() != null) {
+				solicitacaoToEdit.setValorDesconto(solicitacaoPagamento.getValorDesconto());
+				Float valorTotal = solicitacaoPagamento.getValorPrestado();
+				valorTotal-=solicitacaoPagamento.getValorDesconto();
+				solicitacaoPagamento.setTotal(valorTotal);
+			}
+			return solicitacaoPagamentoRepository.saveAndFlush(solicitacaoPagamento);
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, "erro: " + ex.getMessage() + ", " + ex.getClass().getName());
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
@@ -127,14 +84,20 @@ public class SolicitacaoRest {
 
 	@GetMapping
 	@ResponseBody
-	List<Solicitacao> buscar(@RequestParam(required = false) Long userRequisitanteId,
+	List<SolicitacaoPagamento> buscar(@RequestParam(required = false) Long solicitacaoId,
+			@RequestParam(required = false) Long userRequisitanteId,
 			@RequestParam(required = false) Long userRequisitadoId, @RequestParam(required = false) Status status,
 			@RequestParam(required = false) String dataInicio, @RequestParam(required = false) String dataFim) {
 		logger.log(Level.INFO, "buscar solicitacões");
 		try {
 			Solicitacao solicitacaoFind = new Solicitacao();
-			List<Solicitacao> solicitacoes = null;
-			if (userRequisitanteId != null || userRequisitadoId != null || status != null) {
+			solicitacaoFind.setStatus(com.evita.model.Solicitacao.Status.CONCLUIDO);
+			Set<Solicitacao> solicitacoes = null;
+			if (solicitacaoId != null) {
+				logger.log(Level.FINE, "solicitacaoId " + solicitacaoId);
+				solicitacaoFind.setId(solicitacaoId);
+			}
+			if (userRequisitanteId != null || userRequisitadoId != null) {
 				if (userRequisitanteId != null) {
 					logger.log(Level.FINE, "userRequisitanteId " + userRequisitanteId);
 					UsuarioEndereco userEndereco = new UsuarioEndereco(new Usuario(userRequisitanteId));
@@ -144,13 +107,8 @@ public class SolicitacaoRest {
 					logger.log(Level.FINE, "userRequisitadoId " + userRequisitadoId);
 					solicitacaoFind.setUserRequisitado(new Usuario(userRequisitadoId));
 				}
-				if (status != null) {
-					logger.log(Level.FINE, "status " + status);
-					solicitacaoFind.setStatus(status);
-				}
-				solicitacoes = solicitacaoRepository.findAll(Example.of(solicitacaoFind));
-			} else
-				solicitacoes = solicitacaoRepository.findAll();
+			}
+			solicitacoes = new HashSet<>(solicitacaoRepository.findAll(Example.of(solicitacaoFind)));
 			Date dtInicio = StringUtils.isEmpty(dataInicio) || dataInicio.contentEquals("null") ? null
 					: new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataInicio);
 			Date dtFim = StringUtils.isEmpty(dataFim) || dataFim.contentEquals("null") ? null
@@ -159,15 +117,20 @@ public class SolicitacaoRest {
 			if (dtFim != null && dtInicio != null)
 				solicitacoes.stream().filter(
 						solicitacao -> solicitacao.getInicio().after(dtInicio) && solicitacao.getInicio().before(dtFim))
-						.collect(Collectors.toList());
+						.collect(Collectors.toSet());
 			else if (dtFim != null)
 				solicitacoes.stream().filter(solicitacao -> solicitacao.getInicio().before(dtInicio))
-						.collect(Collectors.toList());
+						.collect(Collectors.toSet());
 			else if (dtInicio != null)
 				solicitacoes.stream().filter(solicitacao -> solicitacao.getInicio().after(dtInicio))
+						.collect(Collectors.toSet());
+			logger.log(Level.INFO, "encontrados " + solicitacoes.size() + " solicitações concluídas");
+			List<SolicitacaoPagamento> solicitacaoPagamentos = solicitacaoPagamentoRepository
+					.findAllBySolicitacaoIn(solicitacoes);
+			if (status != null)
+				solicitacaoPagamentos.stream().filter(pagFilter -> pagFilter.getStatus() == status)
 						.collect(Collectors.toList());
-			logger.log(Level.INFO, "retornando " + solicitacoes.size() + " solicitações");
-			return solicitacoes;
+			return solicitacaoPagamentos;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
@@ -175,11 +138,12 @@ public class SolicitacaoRest {
 
 	}
 
-	private void validate(Solicitacao solicitacao) {
-		logger.log(Level.INFO, "validando solicitação " + solicitacao);
+	private void validate(SolicitacaoPagamento solicitacaoPagamento) {
+		logger.log(Level.INFO, "validando solicitação de pagamento " + solicitacaoPagamento);
 		Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 		StringBuilder sb = new StringBuilder();
-		validator.validate(solicitacao).stream().forEach(violation -> sb.append(violation.getMessage()).append(";"));
+		validator.validate(solicitacaoPagamento).stream()
+				.forEach(violation -> sb.append(violation.getMessage()).append(";"));
 
 		if (sb.length() > 0) {
 			logger.log(Level.SEVERE, sb.toString());

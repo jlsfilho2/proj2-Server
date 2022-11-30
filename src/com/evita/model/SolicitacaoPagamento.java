@@ -69,11 +69,11 @@ public class SolicitacaoPagamento {
 
 
 
-	enum Tipo {
+	public enum Tipo {
 		BANCO, PIX, DINHEIRO, BOLETO
 	}
 
-	enum Status {
+	public enum Status {
 		CONFIRMADO, PENDENTE
 	}
 
