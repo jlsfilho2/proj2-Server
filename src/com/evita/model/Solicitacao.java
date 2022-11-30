@@ -11,7 +11,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
@@ -64,6 +63,17 @@ public class Solicitacao {
 	@NotNull(message="Categoria do serviço deve ser informada")
 	Categoria categoria;
 	
+	@OneToOne(optional=true,mappedBy="solicitacao")
+	SolicitacaoPagamento pagamento;
+	
+	public Solicitacao() {
+		
+	}
+	
+	public Solicitacao(Long id) {
+		this.id = id;
+	}
+	
 	
 	public enum Status {
 		INICIADO,
@@ -87,6 +97,11 @@ public class Solicitacao {
 
 	public UsuarioEndereco getEnderecoRequisitante() {
 		return enderecoRequisitante;
+	}
+	
+	public Usuario getUsuarioRequisitante() {
+		Usuario user = enderecoRequisitante.getUser();
+		return user != null? user : null ;
 	}
 
 
@@ -162,6 +177,18 @@ public class Solicitacao {
 	public void setCategoria(Categoria categoria) {
 		this.categoria = categoria;
 	}
+
+
+	public SolicitacaoPagamento getPagamento() {
+		return pagamento;
+	}
+
+
+	public void setPagamento(SolicitacaoPagamento pagamento) {
+		this.pagamento = pagamento;
+	}
+	
+	
 	
 	
 	

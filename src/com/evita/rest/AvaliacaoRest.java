@@ -2,6 +2,7 @@ package com.evita.rest;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -47,8 +49,16 @@ public class AvaliacaoRest {
 		logger.log(Level.INFO, "criar avaliação " + avaliacao);
 		validate(avaliacao);
 		try {
+			List<Avaliacao> avaliacoesExistentes = this.avaliacaoRepository.findBySolicitacao(
+					new Solicitacao (
+							avaliacao.getSolicitacao().getId()));
+			if(!avaliacoesExistentes.isEmpty()) {
+				logger.log(Level.SEVERE, "Solicitacao com id " + avaliacao.getSolicitacao().getId() +" já está avaliada");
+				throw new ResponseStatusException(
+				           HttpStatus.BAD_REQUEST, "Solicitacao já está avaliada");
+			}
 			Avaliacao newAvaliacao = this.avaliacaoRepository.saveAndFlush(avaliacao);
-
+			newAvaliacao = this.avaliacaoRepository.getById(newAvaliacao.getId());
 			return newAvaliacao;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
@@ -75,8 +85,20 @@ public class AvaliacaoRest {
 		}
 
 	}
+	
+	@DeleteMapping(consumes = {"application/xml","application/json"})
+	void deletar(@RequestParam(required = true) Long id) {
+		logger.log(Level.INFO, "deletar avaliação " + id);
+		//validate(avaliacao);
+		try {
+			this.avaliacaoRepository.deleteAllByIdInBatch(Arrays.asList(id));
+		} catch (Exception ex) {
+			logger.log(Level.SEVERE, ex.getMessage());
+		}
 
-	@GetMapping(consumes= MediaType.APPLICATION_JSON_VALUE)
+	}
+
+	@GetMapping
 	@ResponseBody
 	List<Avaliacao> buscar(@RequestParam(required = false) Long userRequisitanteId,
 			@RequestParam(required = false) Long userRequisitadoId,

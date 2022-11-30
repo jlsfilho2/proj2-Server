@@ -109,6 +109,7 @@ public class UsuarioRest {
 					}
 					else if (endereco.getId() != null) {
 						UsuarioEndereco enderecoEdit = enderecosUsuario.get(enderecosUsuario.indexOf(endereco));
+						logger.log(Level.FINE, "Editando endereço " + enderecoEdit);
 						enderecoEdit.setNumero(endereco.getNumero());
 						enderecoEdit.setBairro(endereco.getBairro());
 						enderecoEdit.setComplemento(endereco.getComplemento());
@@ -133,16 +134,26 @@ public class UsuarioRest {
 					for (UsuarioCategoria categoria : usuario.getCategorias()) {
 						if (!categoriasUsuario.contains(categoria)) {
 							categoria.setUser(userToEdit);
+							logger.log(Level.FINE, "Criando Categoria " + categoria.getId());
 							userCategoriaRepository.saveAndFlush(categoria);
 						} else if (categoria.getId() != null) {
 							UsuarioCategoria categoriaEdit = categoriasUsuario
 									.get(categoriasUsuario.indexOf(categoria));
+							logger.log(Level.FINE, "Editando Categoria " + categoria.getId());
 							categoriaEdit.setValor(categoria.getValor());
+							categoriaEdit.setCategoria(categoria.getCategoria());
 							userCategoriaRepository.saveAndFlush(categoriaEdit);
 						}
 					}
+					for (UsuarioCategoria categoria : categoriasUsuario) {
+						if (!usuario.getCategorias().contains(categoria)) {
+							logger.log(Level.FINE, "Deletando Categoria " + categoria.getId());
+							userCategoriaRepository.delete(categoria);
+						} 
+					}
 				} else if (usuario.getCategorias() != null && usuario.getCategorias().isEmpty()) {
 					List<UsuarioCategoria> categoriasUsuario = userCategoriaRepository.findByUser(usuario);
+					logger.log(Level.FINE, "Deletando totas das categorias " + categoriasUsuario);
 					userCategoriaRepository.deleteAll(categoriasUsuario);
 				}
 			}

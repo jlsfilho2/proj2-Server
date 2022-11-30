@@ -15,7 +15,11 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 @Entity
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SolicitacaoPagamento {
 
 	@Id
@@ -25,6 +29,7 @@ public class SolicitacaoPagamento {
 
 	@OneToOne
 	@NotNull(message = "Solicitação deve ser informada")
+	@JsonIgnore
 	Solicitacao solicitacao;
 
 	@Column

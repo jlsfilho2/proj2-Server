@@ -50,30 +50,29 @@ public class UsuariosRest {
 	@GetMapping
 	@ResponseBody
 	List<Usuario> buscar(@RequestParam(required = false) Categoria categoria, @RequestParam(required = false) UF uf,
-			@RequestParam(required = false) String cidade, @RequestParam(required = false) String bairro
-			,@RequestParam(required = false, defaultValue="CLIENTE_PRESTADOR") TIPO tipo) {
+			@RequestParam(required = false) String cidade, @RequestParam(required = false) String bairro,
+			@RequestParam(required = false, defaultValue = "CLIENTE_PRESTADOR") TIPO tipo) {
 		logger.log(Level.INFO, "buscar usuários " + tipo);
 		boolean comCategoria = categoria != null;
-		boolean comEndereco = uf != null
-				|| (!StringUtils.isEmpty(cidade) && !cidade.contentEquals("null"))
+		boolean comEndereco = uf != null || (!StringUtils.isEmpty(cidade) && !cidade.contentEquals("null"))
 				|| (!StringUtils.isEmpty(bairro) && !bairro.contentEquals("null"));
 		try {
 			Set<Long> ids = new HashSet<>();
 			Set<Long> idsEndereco = new HashSet<>();
-			if(tipo== TIPO.CLIENTE) {
-				logger.log(Level.INFO,"somente Clientes");
+			if (tipo == TIPO.CLIENTE) {
+				logger.log(Level.INFO, "somente Clientes");
 				List<UsuarioCategoria> usuariosCategoria = userCategoriaRepository.findAll();
 				for (UsuarioCategoria cat : usuariosCategoria)
 					ids.add(cat.getUser().getId());
 			}
-			if(tipo== TIPO.PRESTADOR) {
-				logger.log(Level.INFO,"somente Prestadores");
+			if (tipo != TIPO.CLIENTE && !comCategoria) {
+				logger.log(Level.INFO, "somente Prestadores");
 				List<UsuarioCategoria> usuariosCategoria = userCategoriaRepository.findAll();
 				for (UsuarioCategoria cat : usuariosCategoria)
 					ids.add(cat.getUser().getId());
 			}
-			if (tipo!= TIPO.CLIENTE && comCategoria) {
-				logger.log(Level.INFO,"com categoria");
+			if (tipo != TIPO.CLIENTE && comCategoria) {
+				logger.log(Level.INFO, "com categoria");
 				List<UsuarioCategoria> usuariosCategoria = userCategoriaRepository.findByCategoria(categoria);
 				logger.log(Level.INFO,
 						"encontrados " + usuariosCategoria.size() + " usuários com a categoria " + categoria);
@@ -82,55 +81,68 @@ public class UsuariosRest {
 			}
 			if (comEndereco) {
 				UsuarioEndereco usuarioEndereco = new UsuarioEndereco();
-				
+
 				if (uf != null)
 					usuarioEndereco.setUf(uf);
-				if (!StringUtils.isEmpty(cidade)&& !cidade.contentEquals("null"))
+				if (!StringUtils.isEmpty(cidade) && !cidade.contentEquals("null"))
 					usuarioEndereco.setCidade(cidade);
-				if (!StringUtils.isEmpty(bairro)&& !bairro.contentEquals("null"))
+				if (!StringUtils.isEmpty(bairro) && !bairro.contentEquals("null"))
 					usuarioEndereco.setBairro(bairro);
 				List<UsuarioEndereco> usuariosEndereco = userEnderecoRepository.findAll(Example.of(usuarioEndereco));
 				logger.log(Level.INFO,
 						"encontrados " + usuariosEndereco.size() + " usuários com a endereco " + usuarioEndereco);
 				for (UsuarioEndereco end : usuariosEndereco)
 					idsEndereco.add(end.getUser().getId());
-				
+
 			}
 			List<Usuario> usuarios = new ArrayList<>();
-			if(tipo== TIPO.CLIENTE) {
-				logger.log(Level.INFO,"listando clientes fora da lista");
+			if (tipo == TIPO.CLIENTE && !comEndereco) {
+				logger.log(Level.INFO, "listando clientes sem endereço");
 				usuarios = userRepository.findAllByIdNotIn(ids);
-			} else if(tipo== TIPO.PRESTADOR && !comCategoria && !comEndereco) {
-				logger.log(Level.INFO,"listando prestadores na lista");
+			} else if (tipo == TIPO.CLIENTE && comEndereco) {
+				logger.log(Level.INFO, "listando clientes com endereço");
+				List<Usuario> usuariosClientes = userRepository.findAllByIdNotIn(ids);
+				for (Usuario usuario : usuariosClientes)
+					if (idsEndereco.contains(usuario.getId()))
+						usuarios.add(usuario);
+				logger.log(Level.INFO, "restam " + usuarios.size() + " usuários");
+			} else if (tipo == TIPO.PRESTADOR && !comCategoria && !comEndereco) {
+				logger.log(Level.INFO, "listando prestadores na lista");
 				usuarios = userRepository.findAllByIdIn(ids);
-			}else if(tipo!= TIPO.CLIENTE && comCategoria && comEndereco) {
-				logger.log(Level.INFO,"com categoria e com endereço");
+			} else if (tipo != TIPO.CLIENTE && comCategoria && comEndereco) {
+				logger.log(Level.INFO, "com categoria e com endereço");
 				ids = ids.stream().filter(element -> idsEndereco.contains(element)).collect(Collectors.toSet());
-				logger.log(Level.INFO,"restam ids " + ids.size());
+				logger.log(Level.INFO, "restam ids " + ids.size());
 				usuarios = userRepository.findAllByIdIn(ids);
+			} else if (tipo != TIPO.CLIENTE && comCategoria && !comEndereco) {
+				logger.log(Level.INFO, "com categoria");
+				usuarios = userRepository.findAllByIdIn(ids);
+			} else if (comEndereco) {
+				logger.log(Level.INFO, "com endereço");
+				usuarios = userRepository.findAllByIdIn(idsEndereco);
 			}
-			else if(comEndereco) {
-				ids = idsEndereco;
-				logger.log(Level.INFO,"com endereço");
-				usuarios = userRepository.findAllByIdIn(ids);
-			}
-			else if(tipo!= TIPO.CLIENTE && comCategoria)
-			{
-				logger.log(Level.INFO,"com categoria");
-				usuarios = userRepository.findAllByIdIn(ids);
-			} else 
+			else
 				usuarios = userRepository.findAll();
 			logger.log(Level.INFO, "retornando " + usuarios.size() + " usuários");
+			if(comCategoria) {
+				logger.log(Level.FINE, "filtrando categorias " + categoria.name());
+				for(Usuario usuario: usuarios) {
+					Set<UsuarioCategoria> usuarioCategorias = usuario.getCategorias();
+					usuarioCategorias = usuarioCategorias.stream()
+							.filter(categoriaUsuario -> categoriaUsuario.getCategoria() == categoria).collect(Collectors.toSet());
+					usuario.setCategorias(usuarioCategorias);
+				}
+			}
 			return usuarios;
 		} catch (Exception ex) {
-			logger.log(Level.SEVERE, ex.getMessage(),ex);
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
 		}
 
 	}
-	
+
 	enum TIPO {
-		CLIENTE,CLIENTE_PRESTADOR,PRESTADOR
+		CLIENTE, CLIENTE_PRESTADOR, PRESTADOR
 	}
 
 }

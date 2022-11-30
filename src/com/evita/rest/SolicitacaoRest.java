@@ -2,6 +2,7 @@ package com.evita.rest;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -67,6 +69,19 @@ public class SolicitacaoRest {
 			logger.log(Level.SEVERE, ex.getMessage());
 			throw new ResponseStatusException(
 			           HttpStatus.BAD_REQUEST, ex.getMessage());
+		}
+
+	}
+	
+	@DeleteMapping(consumes = {"application/xml","application/json"})
+	void deletar(@RequestParam(required = true) Long id) {
+		logger.log(Level.INFO, "deletar solicitacao " + id);
+		try {
+			Solicitacao solicitacaoToEdit = this.solicitacaoRepository.getById(id);
+			if(solicitacaoToEdit.getStatus() == Status.AGENDADO)
+				this.solicitacaoRepository.deleteAllByIdInBatch(Arrays.asList(id));
+		} catch (Exception ex) {
+			logger.log(Level.SEVERE, ex.getMessage());
 		}
 
 	}
@@ -127,13 +142,18 @@ public class SolicitacaoRest {
 			List<Solicitacao> solicitacoes = null;
 			if (userRequisitanteId != null || userRequisitadoId != null || status != null) {
 				if (userRequisitanteId != null) {
+					logger.log(Level.FINE, "userRequisitanteId " + userRequisitanteId);
 					UsuarioEndereco userEndereco = new UsuarioEndereco(new Usuario(userRequisitanteId));
 					solicitacaoFind.setEnderecoRequisitante(userEndereco);
 				}
-				if (userRequisitadoId != null)
+				if (userRequisitadoId != null) {
+					logger.log(Level.FINE, "userRequisitadoId " + userRequisitadoId);
 					solicitacaoFind.setUserRequisitado(new Usuario(userRequisitadoId));
-				if (status != null)
+				}
+				if (status != null) {
+					logger.log(Level.FINE, "status " + status);
 					solicitacaoFind.setStatus(status);
+					}
 				solicitacoes = solicitacaoRepository.findAll(Example.of(solicitacaoFind));
 			} else
 				solicitacoes = solicitacaoRepository.findAll();
