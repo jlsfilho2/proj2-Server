@@ -59,11 +59,13 @@ public class PagamentoRest {
 	@ResponseBody
 	SolicitacaoPagamento editar(@RequestBody SolicitacaoPagamento solicitacaoPagamento) {
 		logger.log(Level.INFO, "editar solicitação de pagamento");
+		boolean confirmado = false;
 		try {
 			SolicitacaoPagamento solicitacaoToEdit = this.solicitacaoPagamentoRepository.getById(solicitacaoPagamento.getId());
 			if (solicitacaoPagamento.getStatus() != null) {
 				solicitacaoToEdit.setStatus(solicitacaoPagamento.getStatus());
-				solicitacaoToEdit.setData(solicitacaoPagamento.getStatus() == Status.CONFIRMADO? new Date() : null);
+				confirmado =  solicitacaoPagamento.getStatus() ==  Status.CONFIRMADO;
+				solicitacaoToEdit.setData(confirmado? new Date() : null);
 			}
 			if (solicitacaoPagamento.getTipo() != null) {
 				solicitacaoToEdit.setTipo(solicitacaoPagamento.getTipo());
@@ -73,6 +75,11 @@ public class PagamentoRest {
 				Float valorTotal = solicitacaoPagamento.getValorPrestado();
 				valorTotal-=solicitacaoPagamento.getValorDesconto();
 				solicitacaoPagamento.setTotal(valorTotal);
+			}
+			if(confirmado) {
+				Solicitacao sol = solicitacaoPagamento.getSolicitacao();
+				sol.setStatus(com.evita.model.Solicitacao.Status.PAGO);
+				solicitacaoRepository.saveAndFlush(sol);
 			}
 			return solicitacaoPagamentoRepository.saveAndFlush(solicitacaoPagamento);
 		} catch (Exception ex) {
@@ -91,7 +98,6 @@ public class PagamentoRest {
 		logger.log(Level.INFO, "buscar solicitacões");
 		try {
 			Solicitacao solicitacaoFind = new Solicitacao();
-			solicitacaoFind.setStatus(com.evita.model.Solicitacao.Status.CONCLUIDO);
 			Set<Solicitacao> solicitacoes = null;
 			if (solicitacaoId != null) {
 				logger.log(Level.FINE, "solicitacaoId " + solicitacaoId);

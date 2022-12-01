@@ -20,6 +20,7 @@ import javax.validation.constraints.NotNull;
 
 import com.evita.model.UsuarioCategoria.Categoria;
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -79,7 +80,8 @@ public class Solicitacao {
 		INICIADO,
 		AGENDADO,
 		CANCELADO,
-		CONCLUIDO;
+		CONCLUIDO,
+		PAGO;
 	}
 
 
@@ -178,15 +180,24 @@ public class Solicitacao {
 		this.categoria = categoria;
 	}
 
-
+	@JsonIgnore
 	public SolicitacaoPagamento getPagamento() {
 		return pagamento;
 	}
-
-
+	
 	public void setPagamento(SolicitacaoPagamento pagamento) {
 		this.pagamento = pagamento;
 	}
+	
+	public com.evita.model.SolicitacaoPagamento.Status getPagamentoStatus() {
+		return pagamento != null ? pagamento.getStatus() : null;
+	}
+	
+	public Float getValor() {
+		return pagamento != null ? pagamento.getTotal() : null;
+	}
+
+
 	
 	
 	

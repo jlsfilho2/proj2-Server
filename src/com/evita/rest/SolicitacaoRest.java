@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.evita.model.Avaliacao;
 import com.evita.model.Solicitacao;
 import com.evita.model.Solicitacao.Status;
 import com.evita.model.SolicitacaoPagamento;
@@ -99,7 +98,7 @@ public class SolicitacaoRest {
 					UsuarioCategoria userCategoria = null;
 					SolicitacaoPagamento solicitacaoPagamento = null;
 					List<UsuarioCategoria> usuarioCategoria = usuarioCategoriaRepository
-							.findByUser(solicitacaoToEdit.getUsuarioRequisitante());
+							.findByUser(solicitacaoToEdit.getUserRequisitado());
 					usuarioCategoria = usuarioCategoria.stream()
 							.filter(catFilter -> catFilter.getCategoria() == solicitacaoToEdit.getCategoria())
 							.collect(Collectors.toList());

@@ -15,6 +15,7 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import com.evita.model.UsuarioCategoria.Categoria;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -29,7 +30,6 @@ public class SolicitacaoPagamento {
 
 	@OneToOne
 	@NotNull(message = "Solicitação deve ser informada")
-	@JsonIgnore
 	Solicitacao solicitacao;
 
 	@Column
@@ -85,8 +85,17 @@ public class SolicitacaoPagamento {
 		this.id = id;
 	}
 
+	@JsonIgnore
 	public Solicitacao getSolicitacao() {
 		return solicitacao;
+	}
+	
+	public Categoria getCategoria() {
+		return solicitacao != null ? solicitacao.getCategoria() : null;
+	}
+	
+	public Usuario getUserRequisitante() {
+		return solicitacao != null ? solicitacao.getUsuarioRequisitante() : null;
 	}
 
 	public void setSolicitacao(Solicitacao solicitacao) {
