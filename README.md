@@ -222,18 +222,18 @@ por dataInicio, dataFim, dataInicio e dataFim, userRequisitanteId e userRequisit
 ## manipulção de pagamentos /pagamento
 
 Sempre esta atrelado a uma solicitação de serviço
-```
 ### edição
 PUT:
 
 ```
 {
       "id":4,
-	  "valorDesconto": 5.00,
+      "valorDesconto": 5.00,
       "status" :"CONFIRMADO",
-	  "tipo" : "PIX"
+      "tipo" : "PIX"
 }
 ```
+Obs: são tipos válidos BANCO, PIX, DINHEIRO, BOLETO; são status válidos: CONFIRMADO, PENDENTE, ESTORNADO
 
 ### consultar
 GET: conforme o exemplo: http://whm.joao1866.c41.integrator.host:9206/pagamento?userRequisitanteId=3
