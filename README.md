@@ -177,7 +177,7 @@ POST:
 	"categoria": "MANUTENCAO_HIDRAULICA"
 }
 ```
-Obs: são status válidos INICIADO, AGENDADO, CANCELADO e CONCLUIDO
+Obs: são status válidos INICIADO, AGENDADO, CANCELADO e CONCLUIDO e a data de início deve ser maior do que a data atual
 
 ### editar
 PUT:
@@ -219,14 +219,22 @@ PUT:
 GET: conforme o exemplo: http://whm.joao1866.c41.integrator.host:9206/avaliacao?userRequisitanteId=2
 por dataInicio, dataFim, dataInicio e dataFim, userRequisitanteId e userRequisitadoId
 
-## Outros métodos
+## manipulção de pagamentos /pagamento
 
-### login
-POST para http://whm.joao1866.c41.integrator.host:9206/loggin
+Sempre esta atrelado a uma solicitação de serviço
+```
+### edição
+PUT:
+
 ```
 {
-	"email":"heleninha2@hotmail.com.br",
-	"senha":"teste789"
+      "id":4,
+	  "valorDesconto": 5.00,
+      "status" :"CONFIRMADO",
+	  "tipo" : "PIX"
 }
 ```
-Obs: caso as entradas sejam válidas, serão retornados as informações do usuário.
+
+### consultar
+GET: conforme o exemplo: http://whm.joao1866.c41.integrator.host:9206/pagamento?userRequisitanteId=3
+por dataInicio, dataFim, dataInicio e dataFim, userRequisitanteId e userRequisitadoId
