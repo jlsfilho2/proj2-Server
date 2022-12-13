@@ -79,6 +79,10 @@ public class Usuario {
 		this.id = id;
 	}
 	
+	public Usuario(String email) {
+		this.email = email;
+	}
+	
 
 	@Override
 	public int hashCode() {

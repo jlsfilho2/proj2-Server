@@ -58,7 +58,22 @@ public class SolicitacaoRest {
 		validate(solicitacao);
 		try {
 			Solicitacao newSolicitacao = this.solicitacaoRepository.saveAndFlush(solicitacao);
-
+			logger.log(Level.INFO, "inserindo solicitação de pagamento");
+			List<UsuarioCategoria> usuarioCategoria = usuarioCategoriaRepository
+					.findByUser(solicitacao.getUserRequisitado());
+			
+			usuarioCategoria = usuarioCategoria.stream()
+					.filter(catFilter -> catFilter.getCategoria() == solicitacao.getCategoria())
+					.collect(Collectors.toList());
+			
+			if (!usuarioCategoria.isEmpty()) {
+				logger.log(Level.INFO, "encontrada instancia de usuarioCategoria");
+				UsuarioCategoria userCategoria = usuarioCategoria.get(0);
+				logger.log(Level.INFO, "inserindo com " + userCategoria);
+				SolicitacaoPagamento solicitacaoPagamento = new SolicitacaoPagamento(newSolicitacao, userCategoria.getValor());
+				solicitacaoPagamento = this.solicitacaoPagamentoRepository.saveAndFlush(solicitacaoPagamento);
+				newSolicitacao.setPagamento(solicitacaoPagamento);
+			}
 			return newSolicitacao;
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage());
@@ -93,26 +108,18 @@ public class SolicitacaoRest {
 				solicitacaoToEdit.setFim(solicitacao.getFim());
 			if (solicitacao.getStatus() != null) {
 				solicitacaoToEdit.setStatus(solicitacao.getStatus());
-				if (solicitacao.getStatus() == Status.CONCLUIDO) {
-					logger.log(Level.INFO, "estado concluído, solicitação de pagamento");
-					UsuarioCategoria userCategoria = null;
-					SolicitacaoPagamento solicitacaoPagamento = null;
-					List<UsuarioCategoria> usuarioCategoria = usuarioCategoriaRepository
-							.findByUser(solicitacaoToEdit.getUserRequisitado());
-					usuarioCategoria = usuarioCategoria.stream()
-							.filter(catFilter -> catFilter.getCategoria() == solicitacaoToEdit.getCategoria())
-							.collect(Collectors.toList());
-					if (!usuarioCategoria.isEmpty()) {
-						logger.log(Level.INFO, "encontrada instancia de usuarioCategoria");
-						userCategoria = usuarioCategoria.get(0);
-						logger.log(Level.INFO, "inserindo com " + userCategoria);
-						solicitacaoPagamento = new SolicitacaoPagamento(solicitacaoToEdit, userCategoria.getValor());
-					} else {
-						logger.log(Level.INFO, "criando uma instância default");
-						solicitacaoPagamento = new SolicitacaoPagamento(solicitacaoToEdit, 0.0f);
+				if (solicitacao.getStatus() == Status.CANCELADO) {
+					logger.log(Level.INFO, "estado cancelado, excluindo solicitação de pagamento");
+					List<SolicitacaoPagamento> solicitacoesPagamento = solicitacaoPagamentoRepository.findBySolicitacao(solicitacao);
+					if (!solicitacoesPagamento.isEmpty()) {
+						logger.log(Level.INFO, "encontrada instancia de pagamento");
+						SolicitacaoPagamento solicitacaoPagamento = solicitacoesPagamento.get(0);
+						if(solicitacaoPagamento.getStatus() == com.evita.model.SolicitacaoPagamento.Status.CONFIRMADO) {	
+							solicitacaoPagamento.setStatus(com.evita.model.SolicitacaoPagamento.Status.ESTORNADO);
+							solicitacaoPagamentoRepository.saveAndFlush(solicitacaoPagamento);							
+						}
+						else solicitacaoPagamentoRepository.deleteById(solicitacaoPagamento.getId());
 					}
-					solicitacaoPagamentoRepository.saveAndFlush(solicitacaoPagamento);
-
 				}
 			}
 			this.solicitacaoRepository.saveAndFlush(solicitacaoToEdit);
@@ -128,12 +135,13 @@ public class SolicitacaoRest {
 	@ResponseBody
 	List<Solicitacao> buscar(@RequestParam(required = false) Long userRequisitanteId,
 			@RequestParam(required = false) Long userRequisitadoId, @RequestParam(required = false) Status status,
+			@RequestParam(required = false) String userRequisitadoEmail,@RequestParam(required = false) String userRequisitanteEmail,
 			@RequestParam(required = false) String dataInicio, @RequestParam(required = false) String dataFim) {
 		logger.log(Level.INFO, "buscar solicitacões");
 		try {
 			Solicitacao solicitacaoFind = new Solicitacao();
 			List<Solicitacao> solicitacoes = null;
-			if (userRequisitanteId != null || userRequisitadoId != null || status != null) {
+			if (!StringUtils.isEmpty(userRequisitadoEmail) || !StringUtils.isEmpty(userRequisitanteEmail) || userRequisitanteId != null || userRequisitadoId != null || status != null) {
 				if (userRequisitanteId != null) {
 					logger.log(Level.FINE, "userRequisitanteId " + userRequisitanteId);
 					UsuarioEndereco userEndereco = new UsuarioEndereco(new Usuario(userRequisitanteId));
@@ -142,6 +150,15 @@ public class SolicitacaoRest {
 				if (userRequisitadoId != null) {
 					logger.log(Level.FINE, "userRequisitadoId " + userRequisitadoId);
 					solicitacaoFind.setUserRequisitado(new Usuario(userRequisitadoId));
+				}
+				if (!StringUtils.isEmpty(userRequisitadoEmail)) {
+					logger.log(Level.FINE, "userRequisitadoEmail " + userRequisitadoEmail);
+					solicitacaoFind.setUserRequisitado(new Usuario(userRequisitadoEmail));
+				}
+				if (!StringUtils.isEmpty(userRequisitanteEmail)) {
+					logger.log(Level.FINE, "userRequisitanteEmail " + userRequisitanteEmail);
+					UsuarioEndereco userEndereco = new UsuarioEndereco(new Usuario(userRequisitanteEmail));
+					solicitacaoFind.setEnderecoRequisitante(userEndereco);
 				}
 				if (status != null) {
 					logger.log(Level.FINE, "status " + status);
@@ -156,14 +173,17 @@ public class SolicitacaoRest {
 					: new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataFim);
 
 			if (dtFim != null && dtInicio != null)
-				solicitacoes.stream().filter(
-						solicitacao -> solicitacao.getInicio().after(dtInicio) && solicitacao.getInicio().before(dtFim))
+				solicitacoes = solicitacoes.stream().filter(
+						solicitacao -> (solicitacao.getInicio().after(dtInicio)|| solicitacao.getInicio().equals(dtInicio))
+								&& (solicitacao.getFim().before(dtFim) || solicitacao.getFim().equals(dtFim)))
 						.collect(Collectors.toList());
 			else if (dtFim != null)
-				solicitacoes.stream().filter(solicitacao -> solicitacao.getInicio().before(dtInicio))
+				solicitacoes = solicitacoes.stream().filter(
+						solicitacao -> (solicitacao.getFim().before(dtFim)|| solicitacao.getFim().equals(dtFim)))
 						.collect(Collectors.toList());
 			else if (dtInicio != null)
-				solicitacoes.stream().filter(solicitacao -> solicitacao.getInicio().after(dtInicio))
+				solicitacoes = solicitacoes.stream().filter(
+						solicitacao -> (solicitacao.getInicio().after(dtInicio)|| solicitacao.getInicio().equals(dtInicio)))
 						.collect(Collectors.toList());
 			logger.log(Level.INFO, "retornando " + solicitacoes.size() + " solicitações");
 			return solicitacoes;

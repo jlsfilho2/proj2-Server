@@ -74,7 +74,7 @@ public class SolicitacaoPagamento {
 	}
 
 	public enum Status {
-		CONFIRMADO, PENDENTE
+		CONFIRMADO, PENDENTE, ESTORNADO
 	}
 
 	public long getId() {

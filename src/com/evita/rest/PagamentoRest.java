@@ -72,16 +72,18 @@ public class PagamentoRest {
 			}
 			if (solicitacaoPagamento.getValorDesconto() != null) {
 				solicitacaoToEdit.setValorDesconto(solicitacaoPagamento.getValorDesconto());
-				Float valorTotal = solicitacaoPagamento.getValorPrestado();
+				Float valorTotal = solicitacaoToEdit.getValorPrestado();
 				valorTotal-=solicitacaoPagamento.getValorDesconto();
-				solicitacaoPagamento.setTotal(valorTotal);
+				solicitacaoToEdit.setTotal(valorTotal);
 			}
 			if(confirmado) {
-				Solicitacao sol = solicitacaoPagamento.getSolicitacao();
+				logger.log(Level.INFO, "editar solicitação");
+				Solicitacao sol = solicitacaoToEdit.getSolicitacao();
 				sol.setStatus(com.evita.model.Solicitacao.Status.PAGO);
 				solicitacaoRepository.saveAndFlush(sol);
 			}
-			return solicitacaoPagamentoRepository.saveAndFlush(solicitacaoPagamento);
+			//validate(solicitacaoToEdit);
+			return solicitacaoPagamentoRepository.saveAndFlush(solicitacaoToEdit);
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, "erro: " + ex.getMessage() + ", " + ex.getClass().getName());
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
@@ -121,14 +123,17 @@ public class PagamentoRest {
 					: new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataFim);
 
 			if (dtFim != null && dtInicio != null)
-				solicitacoes.stream().filter(
-						solicitacao -> solicitacao.getInicio().after(dtInicio) && solicitacao.getInicio().before(dtFim))
+				solicitacoes = solicitacoes.stream().filter(
+						solicitacao -> (solicitacao.getInicio().after(dtInicio)|| solicitacao.getInicio().equals(dtInicio))
+								&& (solicitacao.getFim().before(dtFim) || solicitacao.getFim().equals(dtFim)))
 						.collect(Collectors.toSet());
 			else if (dtFim != null)
-				solicitacoes.stream().filter(solicitacao -> solicitacao.getInicio().before(dtInicio))
+				solicitacoes = solicitacoes.stream().filter(
+						solicitacao -> (solicitacao.getFim().before(dtFim)|| solicitacao.getFim().equals(dtFim)))
 						.collect(Collectors.toSet());
 			else if (dtInicio != null)
-				solicitacoes.stream().filter(solicitacao -> solicitacao.getInicio().after(dtInicio))
+				solicitacoes = solicitacoes.stream().filter(
+						solicitacao -> (solicitacao.getInicio().after(dtInicio)|| solicitacao.getInicio().equals(dtInicio)))
 						.collect(Collectors.toSet());
 			logger.log(Level.INFO, "encontrados " + solicitacoes.size() + " solicitações concluídas");
 			List<SolicitacaoPagamento> solicitacaoPagamentos = solicitacaoPagamentoRepository

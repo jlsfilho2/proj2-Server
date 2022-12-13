@@ -15,6 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
 
@@ -44,6 +45,13 @@ public class Solicitacao {
 	@NotNull(message="Usuário requisitado deve ser informado")
 	Usuario userRequisitado;
 	
+	@OneToOne(optional=true,mappedBy="solicitacao")
+	SolicitacaoPagamento pagamento;
+	
+	@Transient
+	Usuario userRequisitante;
+	
+	
 	@Column
 	@Temporal(TemporalType.TIMESTAMP)
 	@Future(message="Data de início deve ser futura")
@@ -64,8 +72,6 @@ public class Solicitacao {
 	@NotNull(message="Categoria do serviço deve ser informada")
 	Categoria categoria;
 	
-	@OneToOne(optional=true,mappedBy="solicitacao")
-	SolicitacaoPagamento pagamento;
 	
 	public Solicitacao() {
 		
@@ -100,15 +106,16 @@ public class Solicitacao {
 	public UsuarioEndereco getEnderecoRequisitante() {
 		return enderecoRequisitante;
 	}
-	
+
 	public Usuario getUsuarioRequisitante() {
-		Usuario user = enderecoRequisitante.getUser();
-		return user != null? user : null ;
+		return userRequisitante;
 	}
 
 
 	public void setEnderecoRequisitante(UsuarioEndereco enderecoRequisitante) {
 		this.enderecoRequisitante = enderecoRequisitante;
+		Usuario user = enderecoRequisitante.getUser();
+		this.userRequisitante = user!=null? user : null ;
 	}
 
 
@@ -128,7 +135,7 @@ public class Solicitacao {
 	
 	@JsonGetter("inicio")
 	public String getInicioFormat() {
-		return new SimpleDateFormat("dd-MM-yyyy HH:mm").format(inicio);
+		return inicio != null ? new SimpleDateFormat("dd-MM-yyyy HH:mm").format(inicio) : "";
 	}
 
 	public void setInicio(Date horaInicio) {
@@ -147,7 +154,7 @@ public class Solicitacao {
 	
 	@JsonGetter("fim")
 	public String getFimFormat() {
-		return new SimpleDateFormat("dd-MM-yyyy HH:mm").format(fim);
+		return fim!= null? new SimpleDateFormat("dd-MM-yyyy HH:mm").format(fim) : "";
 	}
 
 
@@ -196,6 +203,16 @@ public class Solicitacao {
 	public Float getValor() {
 		return pagamento != null ? pagamento.getTotal() : null;
 	}
+
+	public Usuario getUserRequisitante() {
+		return userRequisitante;
+	}
+
+	public void setUserRequisitante(Usuario userRequisitante) {
+		this.userRequisitante = userRequisitante;
+	}
+	
+	
 
 
 	
