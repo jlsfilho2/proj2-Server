@@ -125,14 +125,15 @@ public class AvaliacaoRest {
 					: new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataFim);
 
 			if (dtFim != null && dtInicio != null)
-				avaliacoes.stream().filter(
-						avaliacao -> avaliacao.getSolicitacao().getInicio().after(dtInicio) && avaliacao.getSolicitacao().getInicio().before(dtFim))
+				avaliacoes = avaliacoes.stream().filter(
+						avaliacao -> (avaliacao.getSolicitacao().getInicio().after(dtInicio)|| avaliacao.getSolicitacao().getInicio().equals(dtInicio))
+								&& (avaliacao.getSolicitacao().getFim().before(dtFim) || avaliacao.getSolicitacao().getFim().equals(dtFim)))
 						.collect(Collectors.toList());
 			else if (dtFim != null)
-				avaliacoes.stream().filter(avaliacao -> avaliacao.getSolicitacao().getInicio().before(dtInicio))
+				avaliacoes = avaliacoes.stream().filter(avaliacao -> avaliacao.getSolicitacao().getFim().before(dtFim) || avaliacao.getSolicitacao().getFim().equals(dtFim))
 						.collect(Collectors.toList());
 			else if (dtInicio != null)
-				avaliacoes.stream().filter(avaliacao -> avaliacao.getSolicitacao().getInicio().after(dtInicio))
+				avaliacoes = avaliacoes.stream().filter(avaliacao -> avaliacao.getSolicitacao().getInicio().after(dtInicio) || avaliacao.getSolicitacao().getInicio().equals(dtInicio))
 						.collect(Collectors.toList());
 			logger.log(Level.INFO, "retornando " + avaliacoes.size() + " avaliações");
 			return avaliacoes;
